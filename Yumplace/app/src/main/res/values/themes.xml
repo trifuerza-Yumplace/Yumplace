@@ -1,9 +1,35 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.Yumplace" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+
+    <!-- Base application theme -->
+    <style name="Theme.Yumplace" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary branding color -->
+        <item name="colorPrimary">#030213</item>
+        <item name="colorPrimaryVariant">#000000</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+
+        <!-- Secondary branding color -->
+        <item name="colorSecondary">#F97316</item> <!-- orange-500 -->
+        <item name="colorSecondaryVariant">#EA580C</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+
+        <!-- Background and surface -->
+        <item name="android:colorBackground">#FFFFFF</item>
+        <item name="colorSurface">#FFFFFF</item>
+        <item name="colorOnSurface">#030213</item>
+
+        <!-- Error color -->
+        <item name="colorError">#D4183D</item>
+        <item name="colorOnError">#FFFFFF</item>
+
+        <!-- Other UI colors -->
+        <item name="colorAccent">#F97316</item>
+        <item name="android:textColorPrimary">#030213</item>
+        <item name="android:textColorSecondary">#4B5563</item>
+
+        <!-- Shapes -->
+        <item name="shapeCornerSizeSmall">8dp</item>
+        <item name="shapeCornerSizeMedium">12dp</item>
+        <item name="shapeCornerSizeLarge">16dp</item>
     </style>
 
-    <style name="Theme.Yumplace" parent="Base.Theme.Yumplace" />
 </resources>
