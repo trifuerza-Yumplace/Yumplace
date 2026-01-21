@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <!-- USUARIO -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/imgProfile"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/user"
+            android:scaleType="centerCrop"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginStart="8dp">
+
+            <TextView
+                android:id="@+id/tvUsername"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:text="chef_carlos"
+                android:layout_height="20dp"
+                android:layout_width="200dp"/>
+
+            <TextView
+                android:id="@+id/tvTime"
+                android:textSize="12sp"
+                android:text="hace 2 horas"
+                android:layout_height="25dp"
+                android:layout_width="200dp"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- IMAGEN RECETA -->
+    <ImageView
+        android:id="@+id/imgPost"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_marginTop="8dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/pasta"/>
+
+    <!-- ICONOS -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp">
+
+        <ImageView
+            android:id="@+id/imgLike"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/likevac"/>
+
+        <ImageView
+            android:id="@+id/imgComment"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="16dp"
+            android:src="@drawable/chat"/>
+    </LinearLayout>
+
+    <!-- TEXTO -->
+    <TextView
+        android:id="@+id/tvLikes"
+        android:layout_marginTop="4dp"
+        android:text="342 me gusta"
+        android:textStyle="bold"
+        android:layout_height="20dp"
+        android:layout_width="200dp"/>
+
+    <TextView
+        android:id="@+id/tvComments"
+        android:text="Ver los 28 comentarios"
+        android:layout_height="20dp"
+        android:layout_width="200dp"/>
+
+</LinearLayout>
