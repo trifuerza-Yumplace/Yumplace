@@ -14,6 +14,8 @@ Dicho proyecto será una red social de fotografías, en la que los usuarios podr
 
 Iremos subiendo los avances del desarrollo de código a este repositorio.
 
+Ahora mismo se ha creado la pantalla de login.
+
 ## Instalación
 
 ## Uso
