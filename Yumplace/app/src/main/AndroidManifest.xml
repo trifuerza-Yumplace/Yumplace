@@ -11,18 +11,32 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Yumplace">
-        <activity android:name="controlador.RegisterActivity" />
 
-
+        <!-- LOGIN: pantalla inicial -->
         <activity
             android:name="controlador.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- REGISTER -->
+        <activity
+            android:name="controlador.RegisterActivity"
+            android:exported="false" />
+
+        <!-- FEED -->
+        <activity
+            android:name="controlador.FeedActivity"
+            android:exported="false" />
+
+        <!-- MAIN (si la mantienes en el proyecto) -->
+        <activity
+            android:name="com.engiri.yumplace.MainActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>
