@@ -11,8 +11,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Yumplace">
+        <activity android:name="controlador.RegisterActivity" />
+
+
         <activity
-            android:name=".MainActivity"
+            android:name="controlador.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
