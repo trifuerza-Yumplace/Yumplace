@@ -2,6 +2,7 @@ package controlador;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,6 +20,8 @@ public class FeedActivity extends AppCompatActivity {
     RecyclerView recyclerView;
     PostAdapter adapter;
     List<Post> postList;
+    boolean isLoading = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,17 +31,60 @@ public class FeedActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerPosts);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        // 5 post dinamicos --> back llamar por scroll
         postList = new ArrayList<>();
-        postList.add(new Post(
-                R.drawable.user,
-                "chef_carlos",
-                "hace 2 horas",
-                R.drawable.pasta,
-                342,
-                28
-        ));
+        for (int i = 1; i <= 5; i++) {
+            postList.add(new Post(
+                    R.drawable.user,
+                    "usuario_" + i,
+                    "hace " + i + " horas",
+                    R.drawable.pasta,
+                    100 + i,
+                    10 + i
+            ));
+        }
 
         adapter = new PostAdapter(this, postList);
         recyclerView.setAdapter(adapter);
+
+        // al hacer scroll carga las publi
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+
+                if (layoutManager != null) {
+                    int totalItems = layoutManager.getItemCount();
+                    int lastVisible = layoutManager.findLastVisibleItemPosition();
+
+                    // Si estamos cerca del final → cargamos más
+                    if (!isLoading && lastVisible >= totalItems - 2) {
+                        isLoading = true;
+                        cargarMasPosts();
+                    }
+                }
+            }
+        });
+    }
+
+    // cargar mas publicaciones
+    private void cargarMasPosts() {
+        int start = postList.size();
+
+        for (int i = start; i < start + 5; i++) {
+            postList.add(new Post(
+                    R.drawable.user,
+                    "usuario_" + i,
+                    "hace " + i + " horas",
+                    R.drawable.pasta,
+                    200 + i,
+                    20 + i
+            ));
+        }
+
+        adapter.notifyDataSetChanged();
+        isLoading = false;
     }
 }
