@@ -1,6 +1,7 @@
 package vista;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import com.engiri.yumplace.R;
 
 import java.util.List;
 
+import controlador.PostDetailActivity;
 import modelo.Post;
 
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder> {
@@ -25,7 +27,22 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         this.context = context;
         this.postList = postList;
     }
+    // Convierte una lista completa en texto con viñetas o números
+    private String listaAIngredientes(List<String> lista) {
+        StringBuilder sb = new StringBuilder();
+        for (String item : lista) {
+            sb.append("• ").append(item).append("\n");
+        }
+        return sb.toString();
+    }
 
+    private String listaAPasos(List<String> lista) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < lista.size(); i++) {
+            sb.append(i + 1).append(". ").append(lista.get(i)).append("\n\n");
+        }
+        return sb.toString();
+    }
     @NonNull
     @Override
     public PostViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -68,6 +85,20 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
             // Actualizamos SOLO este item
             notifyItemChanged(position);
+        });
+        // pulsamos imagen y se abre pantalla de detalles
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, PostDetailActivity.class);
+
+            intent.putExtra("username", post.username);
+            intent.putExtra("profileImage", post.profileImage);
+            intent.putExtra("postImage", post.postImage);
+            intent.putExtra("likes", post.likes);
+
+            intent.putExtra("ingredientsText", listaAIngredientes(post.ingredients));
+            intent.putExtra("stepsText", listaAPasos(post.steps));
+
+            context.startActivity(intent);
         });
     }
 

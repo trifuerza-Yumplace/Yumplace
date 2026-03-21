@@ -31,15 +31,15 @@
                 android:textStyle="bold"
                 android:textSize="14sp"
                 android:text="chef_carlos"
-                android:layout_height="20dp"
-                android:layout_width="200dp"/>
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"/>
 
             <TextView
                 android:id="@+id/tvTime"
                 android:textSize="12sp"
                 android:text="hace 2 horas"
-                android:layout_height="25dp"
-                android:layout_width="200dp"/>
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"/>
         </LinearLayout>
     </LinearLayout>
 
@@ -79,13 +79,13 @@
         android:layout_marginTop="4dp"
         android:text="342 me gusta"
         android:textStyle="bold"
-        android:layout_height="20dp"
-        android:layout_width="200dp"/>
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"/>
 
     <TextView
         android:id="@+id/tvComments"
         android:text="Ver los 28 comentarios"
-        android:layout_height="20dp"
-        android:layout_width="200dp"/>
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"/>
 
 </LinearLayout>

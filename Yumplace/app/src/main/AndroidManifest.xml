@@ -37,6 +37,10 @@
             android:name="com.engiri.yumplace.MainActivity"
             android:exported="false" />
 
+        <!-- Detalle Publicacion -->
+        <activity
+            android:name="controlador.PostDetailActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
