@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F8F3F8">
+
+    <!-- CABECERA -->
+    <LinearLayout
+        android:id="@+id/headerDetail"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="12dp"
+        android:background="@android:color/white"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:paddingTop="24dp"
+        android:paddingBottom="12dp">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_media_previous"
+            android:contentDescription="Volver" />
+
+        <ImageView
+            android:id="@+id/imgProfileDetail"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="12dp"
+            android:src="@drawable/user" />
+
+        <TextView
+            android:id="@+id/tvUsernameDetail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="chef_carlos"
+            android:textStyle="bold"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <!-- CONTENIDO CON SCROLL -->
+    <ScrollView
+        android:id="@+id/scrollDetail"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/headerDetail"
+        app:layout_constraintBottom_toTopOf="@id/commentBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="80dp"
+            android:paddingTop="8dp">
+
+            <ImageView
+                android:id="@+id/imgPostDetail"
+                android:layout_width="match_parent"
+                android:layout_height="260dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/pasta" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="12dp">
+
+                <ImageView
+                    android:id="@+id/imgLikeDetail"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/likevac" />
+
+                <ImageView
+                    android:id="@+id/imgCommentDetail"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="16dp"
+                    android:src="@drawable/chat" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvLikesDetail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="342 me gusta"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvTitleRecipe"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="16dp"
+                android:text="Pasta Carbonara Auténtica"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvTimeRecipe"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="8dp"
+                android:text="25 minutos" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="20dp"
+                android:text="Ingredientes:"
+                android:textColor="#FF6F00"
+                android:textStyle="bold"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/tvIngredients"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="12dp"
+                android:text="• 400g de espaguetis&#10;• 200g de panceta o guanciale&#10;• 4 huevos&#10;• 100g de queso pecorino&#10;• Pimienta negra&#10;• Sal"
+                android:lineSpacingExtra="4dp" />
+
+            <!-- boton despliegue -->
+            <TextView
+                android:id="@+id/btnExpandIngredients"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="12dp"
+                android:text="Ver más"
+                android:textColor="#FF6F00"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="8dp"
+                android:text="Preparación:"
+                android:textColor="#FF6F00"
+                android:textStyle="bold"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/tvSteps"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="12dp"
+                android:lineSpacingExtra="6dp"
+                android:text="1. Hierve agua con sal y cocina los espaguetis.&#10;&#10;2. Corta la panceta y fríela hasta que quede crujiente.&#10;&#10;3. Bate los huevos con el queso y la pimienta.&#10;&#10;4. Escurre la pasta reservando un poco de agua.&#10;&#10;5. Mezcla la pasta con la panceta y añade la mezcla de huevo.&#10;&#10;6. Ajusta con agua de cocción si hace falta.&#10;&#10;7. Sirve con más queso y pimienta." />
+
+            <!-- boton despliegue -->
+            <TextView
+                android:id="@+id/btnExpandSteps"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="12dp"
+                android:text="Ver más"
+                android:textColor="#FF6F00"
+                android:textStyle="bold"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="#FDE2C5"
+                    android:padding="8dp"
+                    android:text="#pasta"
+                    android:textColor="#FF6F00" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:background="#FDE2C5"
+                    android:padding="8dp"
+                    android:text="#italiana"
+                    android:textColor="#FF6F00" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:background="#FDE2C5"
+                    android:padding="8dp"
+                    android:text="#carbonara"
+                    android:textColor="#FF6F00" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginTop="20dp"
+                android:text="Comentarios"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="12dp"
+                android:text="ana_foodie  ¡Se ve delicioso!&#10;Definitivamente voy a probar esta receta 😍&#10;&#10;pedro_chef  Gran receta, gracias por compartir!" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- BARRA DE COMENTARIO ABAJO -->
+    <LinearLayout
+        android:id="@+id/commentBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="10dp"
+        android:background="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:paddingTop="8dp"
+        android:elevation="10dp">
+
+        <EditText
+            android:id="@+id/etComment"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:background="@android:color/transparent"
+            android:hint="Añade un comentario..." />
+
+        <ImageView
+            android:id="@+id/btnSend"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="12dp"
+            android:src="@android:drawable/ic_menu_send" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
