@@ -15,6 +15,9 @@ import java.util.List;
 import modelo.Post;
 import vista.PostAdapter;
 
+import android.content.Intent;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 public class FeedActivity extends AppCompatActivity {
 
     RecyclerView recyclerView;
@@ -68,6 +71,29 @@ public class FeedActivity extends AppCompatActivity {
         adapter = new PostAdapter(this, postList);
         recyclerView.setAdapter(adapter);
 
+        // naveggar entre pantallas
+        BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
+
+// marcar inicio como seleccionado
+        bottomNav.setSelectedItemId(R.id.nav_home);
+
+// navegación del menú inferior
+        bottomNav.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.nav_home) {
+                return true;
+            } else if (id == R.id.nav_search) {
+                startActivity(new Intent(FeedActivity.this, SearchActivity.class));
+                return true;
+            } else if (id == R.id.nav_add) {
+                return true;
+            } else if (id == R.id.nav_profile) {
+                return true;
+            }
+
+            return false;
+        });
         // al hacer scroll carga las publi
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
