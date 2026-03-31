@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import vista.RecipeGridAdapter;
+import modelo.Post;
+import modelo.PostRepository;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -36,20 +38,23 @@ public class ProfileActivity extends AppCompatActivity {
         Button btnEditProfile = findViewById(R.id.btnEditProfile);
 
         myImages = new ArrayList<>();
+
+        // Posts de prueba que ya tenías
         myImages.add(R.drawable.pasta);
         myImages.add(R.drawable.pasta);
         myImages.add(R.drawable.pasta);
         myImages.add(R.drawable.pasta);
         myImages.add(R.drawable.pasta);
         myImages.add(R.drawable.pasta);
+
+        // Añadir publicaciones creadas desde PublicPostActivity
+        for (Post post : PostRepository.postsPublicados) {
+            myImages.add(0, post.postImage);
+        }
 
         rvMyRecipes.setLayoutManager(new GridLayoutManager(this, 3));
         adapter = new RecipeGridAdapter(this, myImages);
         rvMyRecipes.setAdapter(adapter);
-
-        btnEditProfile.setOnClickListener(v -> {
-            Toast.makeText(this, "Función de editar perfil próximamente", Toast.LENGTH_SHORT).show();
-        });
 
         bottomNavigation.setSelectedItemId(R.id.nav_profile);
 
@@ -65,6 +70,7 @@ public class ProfileActivity extends AppCompatActivity {
                 finish();
                 return true;
             } else if (id == R.id.nav_add) {
+                startActivity(new Intent(this, PublicPostActivity.class));
                 return true;
             } else if (id == R.id.nav_profile) {
                 return true;

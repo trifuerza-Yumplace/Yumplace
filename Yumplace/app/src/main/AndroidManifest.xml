@@ -57,6 +57,11 @@
             android:name="controlador.EditProfileActivity"
             android:exported="false" />
 
+        <!-- Publicar receta -->
+        <activity
+            android:name="controlador.PublicPostActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

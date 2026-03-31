@@ -74,10 +74,10 @@ public class FeedActivity extends AppCompatActivity {
         // naveggar entre pantallas
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
 
-// marcar inicio como seleccionado
+        // marcar inicio como seleccionado
         bottomNav.setSelectedItemId(R.id.nav_home);
 
-// navegación del menú inferior
+        // navegación del menú inferior
         bottomNav.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
 
@@ -87,6 +87,7 @@ public class FeedActivity extends AppCompatActivity {
                 startActivity(new Intent(FeedActivity.this, SearchActivity.class));
                 return true;
             } else if (id == R.id.nav_add) {
+                startActivity(new Intent(FeedActivity.this, PublicPostActivity.class));
                 return true;
             } else if (id == R.id.nav_profile) {
                 startActivity(new Intent(FeedActivity.this, ProfileActivity.class));
