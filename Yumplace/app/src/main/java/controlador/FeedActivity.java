@@ -89,6 +89,7 @@ public class FeedActivity extends AppCompatActivity {
             } else if (id == R.id.nav_add) {
                 return true;
             } else if (id == R.id.nav_profile) {
+                startActivity(new Intent(FeedActivity.this, ProfileActivity.class));
                 return true;
             }
 

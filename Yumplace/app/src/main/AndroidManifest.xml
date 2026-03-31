@@ -47,6 +47,16 @@
             android:name="controlador.SearchActivity"
             android:exported="false" />
 
+        <!-- Perfil -->
+        <activity
+            android:name="controlador.ProfileActivity"
+            android:exported="false" />
+
+        <!-- Editar perfil -->
+        <activity
+            android:name="controlador.EditProfileActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>

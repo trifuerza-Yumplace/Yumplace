@@ -76,7 +76,7 @@ public class SearchActivity extends AppCompatActivity {
             int id = item.getItemId();
 
             if (id == R.id.nav_home) {
-                startActivity(new Intent(SearchActivity.this, FeedActivity.class));
+                startActivity(new Intent(this, FeedActivity.class));
                 finish();
                 return true;
             } else if (id == R.id.nav_search) {
@@ -84,9 +84,10 @@ public class SearchActivity extends AppCompatActivity {
             } else if (id == R.id.nav_add) {
                 return true;
             } else if (id == R.id.nav_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                finish();
                 return true;
             }
-
             return false;
         });
     }
