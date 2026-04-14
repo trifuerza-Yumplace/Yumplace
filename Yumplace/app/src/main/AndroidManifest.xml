@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Yumplace">
         <activity
-            android:name="controlador.OtherProfile"
+            android:name="controlador.OtherProfileActivity"
             android:exported="false" />
         <!-- LOGIN: pantalla inicial -->
         <activity
