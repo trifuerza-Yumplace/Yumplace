@@ -8,6 +8,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.engiri.yumplace.R;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import android.content.Intent;
+import controlador.OtherProfileActivity;
 
 public class PostDetailActivity extends AppCompatActivity {
 
@@ -50,6 +52,12 @@ public class PostDetailActivity extends AppCompatActivity {
         imgProfile.setImageResource(profileImage);
         imgPost.setImageResource(postImage);
         tvLikes.setText(likes + " me gusta");
+
+        findViewById(R.id.headerDetail).setOnClickListener(v -> {
+            android.util.Log.d("CLICK", "HEADER CLICKED");
+            Intent intent = new Intent(PostDetailActivity.this, OtherProfileActivity.class);
+            startActivity(intent);
+        });
 
         // ===== INGREDIENTES =====
         // Crear versión reducida de ingredientes (máximo 4 líneas)
