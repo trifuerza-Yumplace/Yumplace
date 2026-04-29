@@ -12,7 +12,7 @@ public class RetrofitClient {
     private static Retrofit retrofit = null;
 
     // Cambia esta IP por la de tu PC si usas móvil real, o 10.0.2.2 para emulador
-    private static final String BASE_URL = "http://10.0.2.2:8080/";
+    private static final String BASE_URL = "http://10.0.2.2:8082/";
 
     public static ApiService getApiService(Context context) {
         if (retrofit == null) {

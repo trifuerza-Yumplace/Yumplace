@@ -15,6 +15,7 @@ import com.engiri.yumplace.R;
 
 import java.util.List;
 
+import controlador.OtherProfileActivity;
 import controlador.PostDetailActivity;
 import modelo.Post;
 
@@ -58,8 +59,21 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         // Datos básicos
         holder.imgProfile.setImageResource(post.profileImage);
         holder.tvUsername.setText(post.username);
+        holder.tvUsername.setOnClickListener(v -> {
+            Intent intent = new Intent(context, OtherProfileActivity.class);
+
+            // de momento usamos un id fijo para probar
+            intent.putExtra("userId", 10);
+
+            context.startActivity(intent);
+        });
         holder.tvTime.setText(post.time);
         holder.imgPost.setImageResource(post.postImage);
+        holder.imgProfile.setOnClickListener(v -> {
+            Intent intent = new Intent(context, OtherProfileActivity.class);
+            intent.putExtra("userId", 10);
+            context.startActivity(intent);
+        });
         holder.tvLikes.setText(post.likes + " me gusta");
         holder.tvComments.setText("Ver los " + post.comments + " comentarios");
 

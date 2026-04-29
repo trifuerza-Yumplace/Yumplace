@@ -10,6 +10,7 @@ import dto.response.AuthResponse;
 import dto.response.UserResponse;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
@@ -48,6 +49,18 @@ public interface ApiService {
     @GET("users/me")
     public Call<UserResponse> getMyProfile();
 
-    @PUT("users/update")
+    @PUT("users/me")
     public Call<UserResponse> updateUser(@Body UpdateUserRequest request);
+
+    @GET("users/{id}/followers")
+    Call<List<UserResponse>> getFollowers(@Path("id") Integer id);
+
+    @GET("users/{id}/following")
+    Call<List<UserResponse>> getFollowing(@Path("id") Integer id);
+
+    @POST("users/{id}/follow")
+    Call<Void> followUser(@Path("id") Integer id);
+
+    @DELETE("users/{id}/unfollow")
+    Call<Void> unfollowUser(@Path("id") Integer id);
 }

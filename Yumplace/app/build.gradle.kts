@@ -4,12 +4,12 @@ plugins {
 
 android {
     namespace = "com.engiri.yumplace"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.engiri.yumplace"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 

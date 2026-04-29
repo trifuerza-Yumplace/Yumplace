@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="#FFFFFF">
 
-    <!-- HEADER -->
+    <!-- ================= HEADER ================= -->
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="0dp"
@@ -23,15 +23,17 @@
             android:src="@drawable/circle_orange"/>
 
         <TextView
+            android:id="@+id/tvOtherUsername"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="chef_carlos"
+            android:text="usuario"
             android:textSize="18sp"
             android:textStyle="bold"
             android:layout_marginStart="16dp"/>
     </LinearLayout>
 
-    <!-- INFO PERFIL -->
+
+    <!-- ================= BLOQUE PERFIL ================= -->
     <LinearLayout
         android:id="@+id/profileInfo"
         android:layout_width="0dp"
@@ -42,7 +44,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- fila superior -->
+        <!-- ===== FILA SUPERIOR (foto + stats) ===== -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -50,6 +52,7 @@
 
             <!-- FOTO PERFIL -->
             <ImageView
+                android:id="@+id/imgOtherProfile"
                 android:layout_width="70dp"
                 android:layout_height="70dp"
                 android:src="@drawable/user"
@@ -72,9 +75,10 @@
                     android:gravity="center">
 
                     <TextView
+                        android:id="@+id/tvOtherPostsCount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="2"
+                        android:text="0"
                         android:textStyle="bold"
                         android:textSize="16sp"/>
 
@@ -95,9 +99,10 @@
                     android:gravity="center">
 
                     <TextView
+                        android:id="@+id/tvOtherFollowersCount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="2341"
+                        android:text="0"
                         android:textStyle="bold"
                         android:textSize="16sp"/>
 
@@ -118,9 +123,10 @@
                     android:gravity="center">
 
                     <TextView
+                        android:id="@+id/tvOtherFollowingCount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="423"
+                        android:text="0"
                         android:textStyle="bold"
                         android:textSize="16sp"/>
 
@@ -135,21 +141,23 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Nombre -->
+        <!-- ===== NOMBRE ===== -->
         <TextView
+            android:id="@+id/tvOtherName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Carlos Ruiz"
+            android:text="Nombre"
             android:textStyle="bold"
             android:layout_marginTop="8dp"/>
 
-        <!-- Bio -->
+        <!-- ===== BIO ===== -->
         <TextView
+            android:id="@+id/tvOtherBio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="🍕 Pizza lover | IT Cocina italiana"/>
+            android:text="Sin biografía"/>
 
-        <!-- Botones -->
+        <!-- ===== BOTONES ===== -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -157,6 +165,7 @@
             android:layout_marginTop="12dp">
 
             <Button
+                android:id="@+id/btnFollow"
                 android:layout_width="0dp"
                 android:layout_height="40dp"
                 android:layout_weight="1"
@@ -165,6 +174,7 @@
                 android:textColor="#FFFFFF"/>
 
             <Button
+                android:id="@+id/btnMessage"
                 android:layout_width="0dp"
                 android:layout_height="40dp"
                 android:layout_weight="1"
@@ -174,7 +184,8 @@
 
     </LinearLayout>
 
-    <!-- ICONO GRID -->
+
+    <!-- ================= ICONO GRID ================= -->
     <ImageView
         android:id="@+id/gridIcon"
         android:layout_width="22dp"
@@ -185,7 +196,8 @@
         app:layout_constraintStart_toStartOf="parent"
         android:layout_margin="12dp"/>
 
-    <!-- GRID POSTS -->
+
+    <!-- ================= GRID POSTS ================= -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerGrid"
         android:layout_width="0dp"
@@ -195,7 +207,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- BOTTOM NAV -->
+
+    <!-- ================= BOTTOM NAV ================= -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
         android:layout_width="0dp"
