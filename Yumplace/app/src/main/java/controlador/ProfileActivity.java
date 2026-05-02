@@ -26,6 +26,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import vista.RecipeGridAdapter;
+import android.widget.ImageView;
+import com.bumptech.glide.Glide;
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -36,7 +38,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     private ApiService apiService;
     private TextView tvProfileName, tvProfileBio;
-
+    private ImageView imgProfileCircle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +107,8 @@ public class ProfileActivity extends AppCompatActivity {
             Intent intent = new Intent(ProfileActivity.this, EditProfileActivity.class);
             startActivity(intent);
         });
+
+        imgProfileCircle = findViewById(R.id.imgProfileCircle);
     }
 
     private void cargarPerfil() {
@@ -120,6 +124,18 @@ public class ProfileActivity extends AppCompatActivity {
                         tvProfileBio.setText(user.getBiography());
                     } else {
                         tvProfileBio.setText("Sin biografía");
+                    }
+
+                    // 👇 FOTO PERFIL (AQUÍ ES DONDE VA)
+                    String photoUrl = user.getProfilePhoto();
+
+                    if (photoUrl != null && !photoUrl.isEmpty()) {
+                        Glide.with(ProfileActivity.this)
+                                .load(photoUrl)
+                                .circleCrop()
+                                .into(imgProfileCircle);
+                    } else {
+                        imgProfileCircle.setImageResource(R.drawable.user);
                     }
 
                 } else {
