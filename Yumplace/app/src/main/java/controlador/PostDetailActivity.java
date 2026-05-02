@@ -11,7 +11,14 @@ import com.bumptech.glide.Glide;
 import com.engiri.yumplace.R;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
+import java.util.List;
+
 import modelo.TokenManager;
+import remote.ApiService;
+import remote.RetrofitClient;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class PostDetailActivity extends AppCompatActivity {
 
@@ -51,7 +58,7 @@ public class PostDetailActivity extends AppCompatActivity {
         TextView tvTitle = findViewById(R.id.tvTitleRecipe);
         TextView tvTime = findViewById(R.id.tvTimeRecipe);
 
-        // ================= DATOS (SAFE) =================
+        // ================= DATOS =================
         String username = getIntent().getStringExtra("username");
 
         String postImage = getIntent().getStringExtra("postImage");
@@ -76,6 +83,9 @@ public class PostDetailActivity extends AppCompatActivity {
         if (ingredientsText == null) ingredientsText = "";
         final String finalIngredientsText = ingredientsText;
 
+        int userId = getIntent().getIntExtra("userId", -1);
+        int postId = getIntent().getIntExtra("postId", -1); // 🔥 NUEVO
+
         // ================= SET DATA =================
         tvUsername.setText(username != null ? username : "");
         tvLikes.setText(likes + " me gusta");
@@ -90,18 +100,51 @@ public class PostDetailActivity extends AppCompatActivity {
                 .into(imgPost);
 
         // ================= PERFIL CLICK =================
-        int userId = getIntent().getIntExtra("userId", -1);
-
         findViewById(R.id.headerDetail).setOnClickListener(v -> {
 
-            if (userId == -1) {
-                return; // o Toast si quieres
-            }
+            if (userId == -1) return;
 
             Intent intent = new Intent(PostDetailActivity.this, OtherProfileActivity.class);
             intent.putExtra("userId", userId);
             startActivity(intent);
         });
+
+        // ================= COMENTARIOS (RETROFIT) =================
+        ApiService api = RetrofitClient.getApiService(this);
+
+        if (postId != -1) {
+            api.getComments(postId).enqueue(new Callback<List<Object>>() {
+                @Override
+                public void onResponse(Call<List<Object>> call, Response<List<Object>> response) {
+
+                    if (response.isSuccessful() && response.body() != null) {
+
+                        int totalComments = response.body().size();
+
+                        imgComment.setOnClickListener(v -> {
+                            BottomSheetDialog dialog = new BottomSheetDialog(PostDetailActivity.this);
+                            dialog.setContentView(R.layout.bottom_comments);
+                            dialog.show();
+                        });
+
+                        // opcional: si quieres mostrar contador
+                        // tvComments.setText(totalComments + " comentarios");
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<List<Object>> call, Throwable t) {
+                    // silencioso o log
+                }
+            });
+        } else {
+
+            imgComment.setOnClickListener(v -> {
+                BottomSheetDialog dialog = new BottomSheetDialog(PostDetailActivity.this);
+                dialog.setContentView(R.layout.bottom_comments);
+                dialog.show();
+            });
+        }
 
         // ================= INGREDIENTES =================
         String[] ingredientLines = finalIngredientsText.split("\n");
@@ -153,13 +196,6 @@ public class PostDetailActivity extends AppCompatActivity {
             }
 
             stepsExpanded[0] = !stepsExpanded[0];
-        });
-
-        // ================= COMENTARIOS =================
-        imgComment.setOnClickListener(v -> {
-            BottomSheetDialog dialog = new BottomSheetDialog(this);
-            dialog.setContentView(R.layout.bottom_comments);
-            dialog.show();
         });
     }
 }

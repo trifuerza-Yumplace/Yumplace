@@ -2,6 +2,7 @@ package vista;
 
 import android.content.Context;
 import android.content.Intent;
+import android.widget.Toast;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,11 +20,17 @@ import java.util.List;
 import controlador.OtherProfileActivity;
 import controlador.PostDetailActivity;
 import modelo.Post;
+import remote.ApiService;
+import remote.RetrofitClient;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder> {
 
     List<Post> postList;
     Context context;
+    ApiService apiService;
 
     private final String DEFAULT_IMAGE =
             "https://media.istockphoto.com/id/165598110/es/vector/solar-de-construcci%C3%B3n.jpg?s=612x612&w=0&k=20&c=CHRUil8J-yeXtkUvetIPKBdXS_mi4fBq7yLPQzpTwfU=";
@@ -31,6 +38,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     public PostAdapter(Context context, List<Post> postList) {
         this.context = context;
         this.postList = postList;
+        this.apiService = RetrofitClient.getApiService(context);
     }
 
     @NonNull
@@ -46,20 +54,17 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
         Post post = postList.get(position);
 
-        // ================= DATOS =================
         holder.tvUsername.setText(post.getUsername());
         holder.tvTime.setText(post.getTime());
         holder.tvLikes.setText(post.getLikes() + " me gusta");
         holder.tvComments.setText("Ver los " + post.getComments() + " comentarios");
 
-        // ================= IMAGEN =================
         String imageUrl = post.getPostImage();
 
         if (imageUrl == null || imageUrl.isEmpty()) {
             imageUrl = DEFAULT_IMAGE;
         }
 
-        // 🔥 IMPORTANTE: variable FINAL para lambda
         final String finalImageUrl = imageUrl;
 
         Glide.with(context)
@@ -78,24 +83,65 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             context.startActivity(intent);
         });
 
-        // ================= LIKE =================
+        // ================= LIKE UI =================
         if (post.isLiked()) {
             holder.imgLike.setImageResource(R.drawable.likellen);
         } else {
             holder.imgLike.setImageResource(R.drawable.likevac);
         }
 
+        // ================= LIKE REAL (RETROFIT) =================
         holder.imgLike.setOnClickListener(v -> {
 
-            if (post.isLiked()) {
-                post.setLiked(false);
-                post.setLikes(post.getLikes() - 1);
-            } else {
-                post.setLiked(true);
-                post.setLikes(post.getLikes() + 1);
-            }
+            apiService.likePost(post.getId()).enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
 
-            notifyItemChanged(position);
+                    if (response.isSuccessful()) {
+
+                        // 🔥 actualizar UI SOLO si backend responde OK
+                        holder.imgLike.setOnClickListener(v -> {
+
+                            ApiService api = RetrofitClient.getApiService(context);
+
+                            int postId = post.getId();
+
+                            api.likePost(postId).enqueue(new Callback<Void>() {
+                                @Override
+                                public void onResponse(Call<Void> call, Response<Void> response) {
+
+                                    if (response.isSuccessful()) {
+
+                                        // sincronizar UI SOLO si backend OK
+                                        if (post.isLiked()) {
+                                            post.setLiked(false);
+                                            post.setLikes(post.getLikes() - 1);
+                                        } else {
+                                            post.setLiked(true);
+                                            post.setLikes(post.getLikes() + 1);
+                                        }
+
+                                        notifyItemChanged(position);
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Call<Void> call, Throwable t) {
+                                    // opcional log
+                                }
+                            });
+                        });
+
+                    } else {
+                        Toast.makeText(context, "Error al dar like", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    Toast.makeText(context, "Error de conexión", Toast.LENGTH_SHORT).show();
+                }
+            });
         });
 
         // ================= DETALLE =================
@@ -106,8 +152,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             intent.putExtra("username", post.getUsername());
             intent.putExtra("postImage", finalImageUrl);
             intent.putExtra("likes", post.getLikes());
-
             intent.putExtra("title", post.getTitle());
+            intent.putExtra("postId", post.getId());
 
             intent.putExtra(
                     "time",
@@ -116,11 +162,15 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
             intent.putExtra("stepsText", post.getSteps());
 
-            // ⚠️ si aún no tienes ingredientes en backend, evita crash
             if (post.getIngredients() != null) {
                 intent.putExtra("ingredientsText", String.join("\n", post.getIngredients()));
             } else {
                 intent.putExtra("ingredientsText", "");
+            }
+
+            // 🔥 IMPORTANTE PARA PERFIL
+            if (post.getUser() != null) {
+                intent.putExtra("userId", post.getUser().getId());
             }
 
             context.startActivity(intent);

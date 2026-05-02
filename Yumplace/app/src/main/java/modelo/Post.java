@@ -24,10 +24,14 @@ public class Post {
 
     private User user;
 
-    // No vienen del backend
+    // ================= BACKEND STATE =================
     private int likes = 0;
     private int comments = 0;
-    private boolean isLiked = false;
+
+    // 🔥 NUEVO (estado real del backend)
+    @SerializedName("likedByUser")
+    private boolean likedByUser;
+
     private List<String> ingredients;
 
     private Integer userId;
@@ -83,10 +87,6 @@ public class Post {
         return comments;
     }
 
-    public boolean isLiked() {
-        return isLiked;
-    }
-
     public Integer getPrepTime() {
         return prepTime;
     }
@@ -99,7 +99,30 @@ public class Post {
         return user;
     }
 
-    // ================= SETTERS (NECESARIOS PARA CREATE POST) =================
+    public List<String> getIngredients() {
+        return ingredients;
+    }
+
+    // ================= ❤️ LIKE STATE (PRO FIX) =================
+
+    // 👉 ESTE es el que usa la app
+    public boolean isLiked() {
+        return likedByUser;
+    }
+
+    public void setLiked(boolean liked) {
+        this.likedByUser = liked;
+    }
+
+    public boolean getLikedByUser() {
+        return likedByUser;
+    }
+
+    public void setLikedByUser(boolean likedByUser) {
+        this.likedByUser = likedByUser;
+    }
+
+    // ================= SETTERS =================
 
     public void setId(int id) {
         this.id = id;
@@ -141,20 +164,12 @@ public class Post {
         this.user = user;
     }
 
-    public void setLiked(boolean liked) {
-        isLiked = liked;
-    }
-
     public void setLikes(int likes) {
         this.likes = likes;
     }
 
     public void setComments(int comments) {
         this.comments = comments;
-    }
-
-    public List<String> getIngredients() {
-        return ingredients;
     }
 
     public void setIngredients(List<String> ingredients) {
