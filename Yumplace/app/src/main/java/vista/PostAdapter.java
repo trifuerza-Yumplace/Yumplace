@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.engiri.yumplace.R;
+import com.bumptech.glide.Glide;
 
 import java.util.List;
 
@@ -28,22 +29,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         this.context = context;
         this.postList = postList;
     }
-    // Convierte una lista completa en texto con viñetas o números
-    private String listaAIngredientes(List<String> lista) {
-        StringBuilder sb = new StringBuilder();
-        for (String item : lista) {
-            sb.append("• ").append(item).append("\n");
-        }
-        return sb.toString();
-    }
 
-    private String listaAPasos(List<String> lista) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < lista.size(); i++) {
-            sb.append(i + 1).append(". ").append(lista.get(i)).append("\n\n");
-        }
-        return sb.toString();
-    }
     @NonNull
     @Override
     public PostViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -54,63 +40,62 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull PostViewHolder holder, int position) {
+
         Post post = postList.get(position);
 
-        // Datos básicos
-        holder.imgProfile.setImageResource(post.profileImage);
-        holder.tvUsername.setText(post.username);
+        // ================= DATOS =================
+
+        holder.tvUsername.setText(post.getUsername());
+        holder.tvTime.setText(post.getTime());
+
+        holder.tvLikes.setText(post.getLikes() + " me gusta");
+        holder.tvComments.setText("Ver los " + post.getComments() + " comentarios");
+
+        // ================= IMAGEN =================
+        Glide.with(context)
+                .load(post.getPostImage())
+                .placeholder(R.drawable.pasta) // opcional
+                .into(holder.imgPost);
+
+        // ================= PERFIL CLICK =================
         holder.tvUsername.setOnClickListener(v -> {
             Intent intent = new Intent(context, OtherProfileActivity.class);
-
-            // de momento usamos un id fijo para probar
-            intent.putExtra("userId", 10);
-
+            intent.putExtra("userId", post.getId()); // mejor usar id real
             context.startActivity(intent);
         });
-        holder.tvTime.setText(post.time);
-        holder.imgPost.setImageResource(post.postImage);
-        holder.imgProfile.setOnClickListener(v -> {
-            Intent intent = new Intent(context, OtherProfileActivity.class);
-            intent.putExtra("userId", 10);
-            context.startActivity(intent);
-        });
-        holder.tvLikes.setText(post.likes + " me gusta");
-        holder.tvComments.setText("Ver los " + post.comments + " comentarios");
 
-        // Icono de like según estado
-        if (post.isLiked) {
+        // ================= LIKE ICON =================
+        if (post.isLiked()) {
             holder.imgLike.setImageResource(R.drawable.likellen);
         } else {
             holder.imgLike.setImageResource(R.drawable.likevac);
         }
 
-        // Click en el botón like
+        // ================= CLICK LIKE =================
         holder.imgLike.setOnClickListener(v -> {
 
-            if (post.isLiked) {
-                // Quitar like
-                post.isLiked = false;
-                post.likes--;
+            if (post.isLiked()) {
+                post.setLiked(false);
+                post.setLikes(post.getLikes() - 1);
             } else {
-                // Dar like
-                post.isLiked = true;
-                post.likes++;
+                post.setLiked(true);
+                post.setLikes(post.getLikes() + 1);
             }
 
-            // Actualizamos SOLO este item
             notifyItemChanged(position);
         });
-        // pulsamos imagen y se abre pantalla de detalles
+
+        // ================= DETALLE =================
         holder.itemView.setOnClickListener(v -> {
+
             Intent intent = new Intent(context, PostDetailActivity.class);
 
-            intent.putExtra("username", post.username);
-            intent.putExtra("profileImage", post.profileImage);
-            intent.putExtra("postImage", post.postImage);
-            intent.putExtra("likes", post.likes);
+            intent.putExtra("username", post.getUsername());
+            intent.putExtra("postImage", post.getPostImage());
+            intent.putExtra("likes", post.getLikes());
 
-            intent.putExtra("ingredientsText", listaAIngredientes(post.ingredients));
-            intent.putExtra("stepsText", listaAPasos(post.steps));
+            // ⚠️ steps viene como String
+            intent.putExtra("stepsText", post.getSteps());
 
             context.startActivity(intent);
         });
@@ -121,16 +106,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         return postList.size();
     }
 
-    // 👇 ÚNICO ViewHolder (el correcto)
     static class PostViewHolder extends RecyclerView.ViewHolder {
 
-        ImageView imgProfile, imgPost, imgLike;
+        ImageView imgPost, imgLike;
         TextView tvUsername, tvTime, tvLikes, tvComments;
 
         public PostViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            imgProfile = itemView.findViewById(R.id.imgProfile);
             imgPost = itemView.findViewById(R.id.imgPost);
             imgLike = itemView.findViewById(R.id.imgLike);
             tvUsername = itemView.findViewById(R.id.tvUsername);

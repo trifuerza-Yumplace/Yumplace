@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.engiri.yumplace.R;
+import com.bumptech.glide.Glide;
 
 import java.util.List;
 
@@ -35,7 +36,14 @@ public class ProfileGridAdapter extends RecyclerView.Adapter<ProfileGridAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.image.setImageResource(list.get(position).postImage);
+
+        Post post = list.get(position);
+
+        // ✅ Cargar imagen desde URL
+        Glide.with(context)
+                .load(post.getPostImage())
+                .placeholder(R.drawable.pasta) // opcional
+                .into(holder.image);
     }
 
     @Override
