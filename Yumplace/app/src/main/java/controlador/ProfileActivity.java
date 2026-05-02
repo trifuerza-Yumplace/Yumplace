@@ -3,6 +3,7 @@ package controlador;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.engiri.yumplace.R;
+import com.bumptech.glide.Glide;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
@@ -18,22 +20,20 @@ import java.util.List;
 
 import dto.response.UserResponse;
 import modelo.Post;
-import modelo.PostRepository;
 import modelo.TokenManager;
 import remote.ApiService;
 import remote.RetrofitClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import vista.RecipeGridAdapter;
-import android.widget.ImageView;
-import com.bumptech.glide.Glide;
+import vista.ProfileGridAdapter;
 
 public class ProfileActivity extends AppCompatActivity {
 
     private RecyclerView rvMyRecipes;
-    private RecipeGridAdapter adapter;
-    private List<Integer> myImages;
+    private ProfileGridAdapter adapter;
+    private List<Post> postList = new ArrayList<>();
+
     private BottomNavigationView bottomNavigation;
 
     private ApiService apiService;
@@ -61,26 +61,18 @@ public class ProfileActivity extends AppCompatActivity {
 
         tvProfileName = findViewById(R.id.tvProfileName);
         tvProfileBio = findViewById(R.id.tvProfileBio);
+        imgProfileCircle = findViewById(R.id.imgProfileCircle);
 
-        cargarPerfil();
-
-        myImages = new ArrayList<>();
-
-        myImages.add(R.drawable.pasta);
-        myImages.add(R.drawable.pasta);
-        myImages.add(R.drawable.pasta);
-        myImages.add(R.drawable.pasta);
-        myImages.add(R.drawable.pasta);
-        myImages.add(R.drawable.pasta);
-
-        for (Post post : PostRepository.postsPublicados) {
-            myImages.add(0, post.postImage);
-        }
-
+        // ================= GRID =================
         rvMyRecipes.setLayoutManager(new GridLayoutManager(this, 3));
-        adapter = new RecipeGridAdapter(this, myImages);
+        adapter = new ProfileGridAdapter(this, postList);
         rvMyRecipes.setAdapter(adapter);
 
+        // ================= LOAD DATA =================
+        cargarPerfil();
+        cargarMisPosts();
+
+        // ================= NAV =================
         bottomNavigation.setSelectedItemId(R.id.nav_profile);
 
         bottomNavigation.setOnItemSelectedListener(item -> {
@@ -104,18 +96,19 @@ public class ProfileActivity extends AppCompatActivity {
         });
 
         btnEditProfile.setOnClickListener(v -> {
-            Intent intent = new Intent(ProfileActivity.this, EditProfileActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(this, EditProfileActivity.class));
         });
-
-        imgProfileCircle = findViewById(R.id.imgProfileCircle);
     }
 
+    // ================= PERFIL =================
     private void cargarPerfil() {
+
         apiService.getMyProfile().enqueue(new Callback<UserResponse>() {
             @Override
             public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
+
                 if (response.isSuccessful() && response.body() != null) {
+
                     UserResponse user = response.body();
 
                     tvProfileName.setText(user.getUsername());
@@ -126,7 +119,7 @@ public class ProfileActivity extends AppCompatActivity {
                         tvProfileBio.setText("Sin biografía");
                     }
 
-                    // 👇 FOTO PERFIL (AQUÍ ES DONDE VA)
+                    // FOTO PERFIL
                     String photoUrl = user.getProfilePhoto();
 
                     if (photoUrl != null && !photoUrl.isEmpty()) {
@@ -139,13 +132,47 @@ public class ProfileActivity extends AppCompatActivity {
                     }
 
                 } else {
-                    Toast.makeText(ProfileActivity.this, "Error perfil: " + response.code(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ProfileActivity.this,
+                            "Error perfil: " + response.code(),
+                            Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<UserResponse> call, Throwable t) {
-                Toast.makeText(ProfileActivity.this, "Error conexión", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ProfileActivity.this,
+                        "Error conexión",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // ================= POSTS =================
+    private void cargarMisPosts() {
+
+        apiService.getAllPosts().enqueue(new Callback<List<Post>>() {
+            @Override
+            public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
+
+                if (response.isSuccessful() && response.body() != null) {
+
+                    postList.clear();
+                    postList.addAll(response.body());
+
+                    adapter.notifyDataSetChanged();
+
+                } else {
+                    Toast.makeText(ProfileActivity.this,
+                            "Error posts",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Post>> call, Throwable t) {
+                Toast.makeText(ProfileActivity.this,
+                        "Error conexión",
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -154,5 +181,6 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         cargarPerfil();
+        cargarMisPosts();
     }
 }

@@ -1,5 +1,6 @@
 package controlador;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,17 +9,22 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.content.Intent;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.engiri.yumplace.R;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import modelo.Post;
-import modelo.PostRepository;
+import modelo.TokenManager;
+import remote.ApiService;
+import remote.RetrofitClient;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class PublicPostActivity extends AppCompatActivity {
 
@@ -31,10 +37,22 @@ public class PublicPostActivity extends AppCompatActivity {
     private EditText etTags;
     private Button btnPublish;
 
+    private ApiService apiService;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_public_post);
+
+        TokenManager tokenManager = new TokenManager(this);
+
+        if (tokenManager.getToken() == null || tokenManager.getToken().isEmpty()) {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return;
+        }
+
+        apiService = RetrofitClient.getApiService(this);
 
         containerIngredients = findViewById(R.id.containerIngredients);
         containerSteps = findViewById(R.id.containerSteps);
@@ -74,9 +92,9 @@ public class PublicPostActivity extends AppCompatActivity {
 
     private void renumberIngredients() {
         for (int i = 0; i < containerIngredients.getChildCount(); i++) {
-            View ingredientView = containerIngredients.getChildAt(i);
-            EditText etIngredient = ingredientView.findViewById(R.id.etIngredient);
-            etIngredient.setHint("Ingrediente " + (i + 1));
+            View v = containerIngredients.getChildAt(i);
+            EditText et = v.findViewById(R.id.etIngredient);
+            et.setHint("Ingrediente " + (i + 1));
         }
     }
 
@@ -102,41 +120,28 @@ public class PublicPostActivity extends AppCompatActivity {
 
     private void renumberSteps() {
         for (int i = 0; i < containerSteps.getChildCount(); i++) {
-            View stepView = containerSteps.getChildAt(i);
-            TextView tvStepNumber = stepView.findViewById(R.id.tvStepNumber);
-            EditText etStep = stepView.findViewById(R.id.etStep);
+            View v = containerSteps.getChildAt(i);
+            TextView tv = v.findViewById(R.id.tvStepNumber);
+            EditText et = v.findViewById(R.id.etStep);
 
-            tvStepNumber.setText((i + 1) + ".");
-            etStep.setHint("Paso " + (i + 1));
+            tv.setText((i + 1) + ".");
+            et.setHint("Paso " + (i + 1));
         }
     }
 
     private void publicarPost() {
-        String titulo = etTitle.getText().toString().trim();
-        String tiempoElaboracion = etTime.getText().toString().trim();
-        String etiquetas = etTags.getText().toString().trim();
 
-        List<String> ingredientes = new ArrayList<>();
+        String titulo = etTitle.getText().toString().trim();
+        String descripcion = etTags.getText().toString().trim();
+
         List<String> pasos = new ArrayList<>();
 
-        for (int i = 0; i < containerIngredients.getChildCount(); i++) {
-            View ingredientView = containerIngredients.getChildAt(i);
-            EditText etIngredient = ingredientView.findViewById(R.id.etIngredient);
-            String ingrediente = etIngredient.getText().toString().trim();
-
-            if (!ingrediente.isEmpty()) {
-                ingredientes.add(ingrediente);
-            }
-        }
-
         for (int i = 0; i < containerSteps.getChildCount(); i++) {
-            View stepView = containerSteps.getChildAt(i);
-            EditText etStep = stepView.findViewById(R.id.etStep);
-            String paso = etStep.getText().toString().trim();
+            View v = containerSteps.getChildAt(i);
+            EditText et = v.findViewById(R.id.etStep);
 
-            if (!paso.isEmpty()) {
-                pasos.add(paso);
-            }
+            String text = et.getText().toString().trim();
+            if (!text.isEmpty()) pasos.add(text);
         }
 
         if (titulo.isEmpty()) {
@@ -144,33 +149,46 @@ public class PublicPostActivity extends AppCompatActivity {
             return;
         }
 
-        if (ingredientes.isEmpty()) {
-            Toast.makeText(this, "Añade al menos un ingrediente", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         if (pasos.isEmpty()) {
-            Toast.makeText(this, "Añade al menos un paso", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Añade pasos", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Post nuevoPost = new Post(
-                R.drawable.user,
-                "tu_usuario",
-                "Ahora",
-                R.drawable.pasta,
-                0,
-                0,
-                ingredientes,
-                pasos
-        );
+        // ⚠️ IMPORTANTE: steps es STRING en backend
+        String stepsFinal = String.join("\n", pasos);
 
-        PostRepository.postsPublicados.add(0, nuevoPost);
+        // Crear objeto Post real
+        modelo.Post post = new modelo.Post();
+        post.setTitle(titulo);
+        post.setDescription(descripcion);
+        post.setSteps(stepsFinal);
+        post.setPhoto(""); // si luego subes imágenes, aquí irá URL
+        post.setPrepTime(0);
+        post.setDifficulty("easy");
 
-        Toast.makeText(this, "Publicación creada", Toast.LENGTH_SHORT).show();
+        apiService.createPost(post).enqueue(new Callback<modelo.Post>() {
+            @Override
+            public void onResponse(Call<modelo.Post> call, Response<modelo.Post> response) {
 
-        Intent intent = new Intent(PublicPostActivity.this, ProfileActivity.class);
-        startActivity(intent);
-        finish();
+                if (response.isSuccessful()) {
+                    Toast.makeText(PublicPostActivity.this,
+                            "Post creado",
+                            Toast.LENGTH_SHORT).show();
+
+                    finish();
+                } else {
+                    Toast.makeText(PublicPostActivity.this,
+                            "Error: " + response.code(),
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<modelo.Post> call, Throwable t) {
+                Toast.makeText(PublicPostActivity.this,
+                        "Error conexión",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

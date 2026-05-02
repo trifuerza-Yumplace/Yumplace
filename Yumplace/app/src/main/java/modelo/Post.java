@@ -10,22 +10,27 @@ public class Post {
     private String description;
 
     @SerializedName("photo")
-    private String postImage; // URL de la imagen
+    private String postImage;
 
-    private int prepTime;
+    private Integer prepTime;
     private String difficulty;
 
-    private String steps; // ⚠️ viene como String del backend
+    private String steps;
 
     @SerializedName("publicationDate")
     private String time;
 
     private User user;
 
-    // 🔹 NO viene del backend directamente
-    private int likes;
-    private int comments;
+    // No vienen del backend
+    private int likes = 0;
+    private int comments = 0;
     private boolean isLiked = false;
+
+    // ================= CONSTRUCTOR =================
+    public Post() {
+        // requerido por Gson / Retrofit
+    }
 
     // ================= GETTERS =================
 
@@ -69,7 +74,59 @@ public class Post {
         return isLiked;
     }
 
-    // ================= SETTERS =================
+    public Integer getPrepTime() {
+        return prepTime;
+    }
+
+    public String getDifficulty() {
+        return difficulty;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    // ================= SETTERS (NECESARIOS PARA CREATE POST) =================
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setPostImage(String postImage) {
+        this.postImage = postImage;
+    }
+
+    public void setPhoto(String photo) {
+        this.postImage = photo;
+    }
+
+    public void setPrepTime(Integer prepTime) {
+        this.prepTime = prepTime;
+    }
+
+    public void setDifficulty(String difficulty) {
+        this.difficulty = difficulty;
+    }
+
+    public void setSteps(String steps) {
+        this.steps = steps;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 
     public void setLiked(boolean liked) {
         isLiked = liked;
