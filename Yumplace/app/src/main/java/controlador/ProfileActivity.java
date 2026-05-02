@@ -63,44 +63,42 @@ public class ProfileActivity extends AppCompatActivity {
         tvProfileBio = findViewById(R.id.tvProfileBio);
         imgProfileCircle = findViewById(R.id.imgProfileCircle);
 
-        // ================= GRID =================
         rvMyRecipes.setLayoutManager(new GridLayoutManager(this, 3));
         adapter = new ProfileGridAdapter(this, postList);
         rvMyRecipes.setAdapter(adapter);
 
-        // ================= LOAD DATA =================
-        cargarPerfil();
-        cargarMisPosts();
-
-        // ================= NAV =================
         bottomNavigation.setSelectedItemId(R.id.nav_profile);
 
         bottomNavigation.setOnItemSelectedListener(item -> {
+
             int id = item.getItemId();
 
             if (id == R.id.nav_home) {
                 startActivity(new Intent(this, FeedActivity.class));
                 finish();
                 return true;
+
             } else if (id == R.id.nav_search) {
                 startActivity(new Intent(this, SearchActivity.class));
                 finish();
                 return true;
+
             } else if (id == R.id.nav_add) {
                 startActivity(new Intent(this, PublicPostActivity.class));
                 return true;
-            } else if (id == R.id.nav_profile) {
-                return true;
-            }
-            return false;
+
+            } else return id == R.id.nav_profile;
         });
 
-        btnEditProfile.setOnClickListener(v -> {
-            startActivity(new Intent(this, EditProfileActivity.class));
-        });
+        btnEditProfile.setOnClickListener(v ->
+                startActivity(new Intent(this, EditProfileActivity.class))
+        );
+
+        // 🔥 SOLO CARGAMOS PERFIL
+        cargarPerfil();
     }
 
-    // ================= PERFIL =================
+    // ================= PERFIL (/me) =================
     private void cargarPerfil() {
 
         apiService.getMyProfile().enqueue(new Callback<UserResponse>() {
@@ -113,13 +111,12 @@ public class ProfileActivity extends AppCompatActivity {
 
                     tvProfileName.setText(user.getUsername());
 
-                    if (user.getBiography() != null && !user.getBiography().isEmpty()) {
-                        tvProfileBio.setText(user.getBiography());
-                    } else {
-                        tvProfileBio.setText("Sin biografía");
-                    }
+                    tvProfileBio.setText(
+                            user.getBiography() != null && !user.getBiography().isEmpty()
+                                    ? user.getBiography()
+                                    : "Sin biografía"
+                    );
 
-                    // FOTO PERFIL
                     String photoUrl = user.getProfilePhoto();
 
                     if (photoUrl != null && !photoUrl.isEmpty()) {
@@ -131,6 +128,9 @@ public class ProfileActivity extends AppCompatActivity {
                         imgProfileCircle.setImageResource(R.drawable.user);
                     }
 
+                    // 🔥 IMPORTANTE: cargar posts SOLO después del perfil
+                    cargarMisPosts();
+
                 } else {
                     Toast.makeText(ProfileActivity.this,
                             "Error perfil: " + response.code(),
@@ -141,16 +141,17 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<UserResponse> call, Throwable t) {
                 Toast.makeText(ProfileActivity.this,
-                        "Error conexión",
+                        "Error conexión perfil",
                         Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    // ================= POSTS =================
+    // ================= POSTS (/posts/me) =================
     private void cargarMisPosts() {
 
-        apiService.getAllPosts().enqueue(new Callback<List<Post>>() {
+        apiService.getMyPosts().enqueue(new Callback<List<Post>>() {
+
             @Override
             public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
 
@@ -158,12 +159,11 @@ public class ProfileActivity extends AppCompatActivity {
 
                     postList.clear();
                     postList.addAll(response.body());
-
                     adapter.notifyDataSetChanged();
 
                 } else {
                     Toast.makeText(ProfileActivity.this,
-                            "Error posts",
+                            "Error posts: " + response.code(),
                             Toast.LENGTH_SHORT).show();
                 }
             }
@@ -171,7 +171,7 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<List<Post>> call, Throwable t) {
                 Toast.makeText(ProfileActivity.this,
-                        "Error conexión",
+                        "Error conexión posts",
                         Toast.LENGTH_SHORT).show();
             }
         });
@@ -181,6 +181,5 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         cargarPerfil();
-        cargarMisPosts();
     }
 }

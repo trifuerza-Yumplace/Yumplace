@@ -36,6 +36,9 @@ public interface ApiService {
     @GET("posts/user/{userId}")
     Call<List<Post>> getPostsByUser(@Path("userId") Integer userId);
 
+    @GET("posts/me")
+    Call<List<Post>> getMyPosts();
+
     // ===== INTERACCIONES =====
     @POST("posts/{id}/like")
     Call<Void> likePost(@Path("id") Integer id);
