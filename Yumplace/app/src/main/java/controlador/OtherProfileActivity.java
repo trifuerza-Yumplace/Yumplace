@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.engiri.yumplace.R;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +42,7 @@ public class OtherProfileActivity extends AppCompatActivity {
 
     private boolean isFollowing = false;
     private int userId;
+    private ImageView imgOtherProfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +66,8 @@ public class OtherProfileActivity extends AppCompatActivity {
         tvOtherFollowersCount = findViewById(R.id.tvOtherFollowersCount);
         tvOtherFollowingCount = findViewById(R.id.tvOtherFollowingCount);
         btnFollow = findViewById(R.id.btnFollow);
+        btnFollow.setText("Seguir");
+        imgOtherProfile = findViewById(R.id.imgOtherProfile);
 
         recyclerView = findViewById(R.id.recyclerGrid);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
@@ -73,6 +78,29 @@ public class OtherProfileActivity extends AppCompatActivity {
 
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
         bottomNav.setSelectedItemId(R.id.nav_profile);
+
+        bottomNav.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.nav_home) {
+                startActivity(new Intent(this, FeedActivity.class));
+                finish();
+                return true;
+            } else if (id == R.id.nav_search) {
+                startActivity(new Intent(this, SearchActivity.class));
+                finish();
+                return true;
+            } else if (id == R.id.nav_add) {
+                startActivity(new Intent(this, PublicPostActivity.class));
+                return true;
+            } else if (id == R.id.nav_profile) {
+                startActivity(new Intent(this, ProfileActivity.class));
+                finish();
+                return true;
+            }
+
+            return false;
+        });
 
         userId = getIntent().getIntExtra("userId", -1);
 
@@ -103,6 +131,17 @@ public class OtherProfileActivity extends AppCompatActivity {
                         tvOtherBio.setText(user.getBiography());
                     } else {
                         tvOtherBio.setText("Sin biografía");
+                    }
+
+                    String photoUrl = user.getProfilePhoto();
+
+                    if (photoUrl != null && !photoUrl.isEmpty()) {
+                        Glide.with(OtherProfileActivity.this)
+                                .load(photoUrl)
+                                .circleCrop()
+                                .into(imgOtherProfile);
+                    } else {
+                        imgOtherProfile.setImageResource(R.drawable.user);
                     }
 
                 } else {
@@ -173,44 +212,20 @@ public class OtherProfileActivity extends AppCompatActivity {
 
     private void configurarBotonFollow() {
         btnFollow.setOnClickListener(v -> {
+
+            int seguidoresActuales = Integer.parseInt(tvOtherFollowersCount.getText().toString());
+
             if (!isFollowing) {
-                apiService.followUser(userId).enqueue(new Callback<Void>() {
-                    @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
-                        if (response.isSuccessful()) {
-                            isFollowing = true;
-                            btnFollow.setText("Siguiendo");
-                            Toast.makeText(OtherProfileActivity.this, "Siguiendo", Toast.LENGTH_SHORT).show();
-                            cargarSeguidores(userId);
-                        } else {
-                            Toast.makeText(OtherProfileActivity.this, "Error follow: " + response.code(), Toast.LENGTH_SHORT).show();
-                        }
-                    }
+                isFollowing = true;
+                btnFollow.setText("Siguiendo");
+                tvOtherFollowersCount.setText(String.valueOf(seguidoresActuales + 1));
+                Toast.makeText(this, "Ahora sigues a este usuario", Toast.LENGTH_SHORT).show();
 
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
-                        Toast.makeText(OtherProfileActivity.this, "Error follow", Toast.LENGTH_SHORT).show();
-                    }
-                });
             } else {
-                apiService.unfollowUser(userId).enqueue(new Callback<Void>() {
-                    @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
-                        if (response.isSuccessful()) {
-                            isFollowing = false;
-                            btnFollow.setText("Seguir");
-                            Toast.makeText(OtherProfileActivity.this, "Dejado de seguir", Toast.LENGTH_SHORT).show();
-                            cargarSeguidores(userId);
-                        } else {
-                            Toast.makeText(OtherProfileActivity.this, "Error unfollow: " + response.code(), Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
-                        Toast.makeText(OtherProfileActivity.this, "Error unfollow", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                isFollowing = false;
+                btnFollow.setText("Seguir");
+                tvOtherFollowersCount.setText(String.valueOf(seguidoresActuales - 1));
+                Toast.makeText(this, "Has dejado de seguir", Toast.LENGTH_SHORT).show();
             }
         });
     }
