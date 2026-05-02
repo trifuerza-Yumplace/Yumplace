@@ -52,9 +52,16 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         holder.tvComments.setText("Ver los " + post.getComments() + " comentarios");
 
         // ================= IMAGEN =================
+        String imageUrl = post.getPostImage();
+
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            imageUrl = "https://media.istockphoto.com/id/165598110/es/vector/solar-de-construcci%C3%B3n.jpg?s=612x612&w=0&k=20&c=CHRUil8J-yeXtkUvetIPKBdXS_mi4fBq7yLPQzpTwfU=";
+        }
+
         Glide.with(context)
-                .load(post.getPostImage())
-                .placeholder(R.drawable.pasta) // opcional
+                .load(imageUrl)
+                .placeholder(R.drawable.pasta)
+                .error(R.drawable.pasta)
                 .into(holder.imgPost);
 
         // ================= PERFIL CLICK =================

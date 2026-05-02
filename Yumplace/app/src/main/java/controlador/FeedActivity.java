@@ -14,6 +14,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import modelo.Post;
 import modelo.TokenManager;
@@ -26,9 +27,17 @@ import vista.PostAdapter;
 
 public class FeedActivity extends AppCompatActivity {
 
+    // ===== DATA =====
+    List<Post> allPosts = new ArrayList<>();
+    List<Post> shownPosts = new ArrayList<>();
+    List<Post> postList = new ArrayList<>();
+
+    int currentIndex = 0;
+    final int PAGE_SIZE = 5;
+
+    // ===== UI =====
     RecyclerView recyclerView;
     PostAdapter adapter;
-    List<Post> postList = new ArrayList<>();
 
     boolean isLoading = false;
 
@@ -53,7 +62,7 @@ public class FeedActivity extends AppCompatActivity {
         adapter = new PostAdapter(this, postList);
         recyclerView.setAdapter(adapter);
 
-        // 🔥 CARGAR POSTS DESDE API
+        // ================= LOAD FIRST DATA =================
         cargarPosts();
 
         // ================= NAVIGATION =================
@@ -61,16 +70,20 @@ public class FeedActivity extends AppCompatActivity {
         bottomNav.setSelectedItemId(R.id.nav_home);
 
         bottomNav.setOnItemSelectedListener(item -> {
+
             int id = item.getItemId();
 
             if (id == R.id.nav_home) {
                 return true;
+
             } else if (id == R.id.nav_search) {
                 startActivity(new Intent(this, SearchActivity.class));
                 return true;
+
             } else if (id == R.id.nav_add) {
                 startActivity(new Intent(this, PublicPostActivity.class));
                 return true;
+
             } else if (id == R.id.nav_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
                 return true;
@@ -79,61 +92,105 @@ public class FeedActivity extends AppCompatActivity {
             return false;
         });
 
-        // ================= SCROLL =================
+        // ================= SCROLL INFINITO =================
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
 
-                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                LinearLayoutManager layoutManager =
+                        (LinearLayoutManager) recyclerView.getLayoutManager();
 
-                if (layoutManager != null) {
-                    int totalItems = layoutManager.getItemCount();
-                    int lastVisible = layoutManager.findLastVisibleItemPosition();
+                if (layoutManager == null) return;
 
-                    if (!isLoading && lastVisible >= totalItems - 2) {
+                int totalItems = layoutManager.getItemCount();
+                int lastVisible = layoutManager.findLastVisibleItemPosition();
+
+                if (!isLoading && lastVisible >= totalItems - 2) {
+
+                    if (currentIndex < allPosts.size()) {
                         isLoading = true;
 
-                        // ⚠️ Tu API no tiene paginación → recargamos
-                        cargarPosts();
+                        cargarSiguientePagina();
+
+                        isLoading = false;
                     }
                 }
             }
         });
     }
 
-    // ================= API CALL =================
+    // ================= 🔥 RANDOM SIEMPRE AL VOLVER =================
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (!allPosts.isEmpty()) {
+
+            // 🔀 nuevo orden cada vez que entras
+            java.util.Collections.shuffle(allPosts, new Random(System.currentTimeMillis()));
+
+            postList.clear();
+            shownPosts.clear();
+            currentIndex = 0;
+
+            cargarSiguientePagina();
+        }
+    }
+
+    // ================= CARGA INICIAL =================
     private void cargarPosts() {
 
         ApiService api = RetrofitClient.getApiService(this);
 
-        Call<List<Post>> call = api.getAllPosts();
+        api.getAllPosts().enqueue(new Callback<List<Post>>() {
 
-        call.enqueue(new Callback<List<Post>>() {
             @Override
             public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
 
                 if (response.isSuccessful() && response.body() != null) {
 
-                    List<Post> nuevosPosts = response.body();
+                    allPosts.clear();
+                    allPosts.addAll(response.body());
 
-                    postList.clear(); // recarga completa
-                    postList.addAll(nuevosPosts);
+                    // 🔀 primera aleatorización
+                    java.util.Collections.shuffle(allPosts, new Random(System.currentTimeMillis()));
 
-                    adapter.notifyDataSetChanged();
+                    postList.clear();
+                    shownPosts.clear();
+                    currentIndex = 0;
 
-                    isLoading = false;
+                    cargarSiguientePagina();
 
                 } else {
                     Log.e("API", "Error: " + response.code());
-                    isLoading = false;
                 }
             }
 
             @Override
             public void onFailure(Call<List<Post>> call, Throwable t) {
                 Log.e("API", "Fallo: " + t.getMessage());
-                isLoading = false;
             }
         });
+    }
+
+    // ================= PAGINACIÓN =================
+    private void cargarSiguientePagina() {
+
+        int count = 0;
+
+        while (currentIndex < allPosts.size() && count < PAGE_SIZE) {
+
+            Post post = allPosts.get(currentIndex);
+
+            if (!shownPosts.contains(post)) {
+                postList.add(post);
+                shownPosts.add(post);
+                count++;
+            }
+
+            currentIndex++;
+        }
+
+        adapter.notifyDataSetChanged();
     }
 }
