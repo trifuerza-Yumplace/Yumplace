@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import modelo.Post;
+import modelo.TokenManager;
 import vista.PostAdapter;
 
 import android.content.Intent;
@@ -31,6 +32,14 @@ public class FeedActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_feed);
+
+        TokenManager tokenManager = new TokenManager(this);
+
+        if (tokenManager.getToken() == null || tokenManager.getToken().isEmpty()) {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return;
+        }
 
         recyclerView = findViewById(R.id.recyclerPosts);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));

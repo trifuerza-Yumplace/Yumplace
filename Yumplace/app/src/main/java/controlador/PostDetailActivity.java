@@ -10,6 +10,7 @@ import com.engiri.yumplace.R;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import android.content.Intent;
 import controlador.OtherProfileActivity;
+import modelo.TokenManager;
 
 public class PostDetailActivity extends AppCompatActivity {
 
@@ -19,6 +20,14 @@ public class PostDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_post_detail);
+
+        TokenManager tokenManager = new TokenManager(this);
+
+        if (tokenManager.getToken() == null || tokenManager.getToken().isEmpty()) {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return;
+        }
 
         // Botón para volver a la pantalla anterior
         btnBack = findViewById(R.id.btnBack);

@@ -19,6 +19,7 @@ import java.util.List;
 import dto.response.UserResponse;
 import modelo.Post;
 import modelo.PostRepository;
+import modelo.TokenManager;
 import remote.ApiService;
 import remote.RetrofitClient;
 import retrofit2.Call;
@@ -41,6 +42,14 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+
+        TokenManager tokenManager = new TokenManager(this);
+
+        if (tokenManager.getToken() == null || tokenManager.getToken().isEmpty()) {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return;
+        }
 
         apiService = RetrofitClient.getApiService(this);
 

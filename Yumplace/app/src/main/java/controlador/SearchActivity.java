@@ -20,6 +20,8 @@ import java.util.List;
 import android.text.Editable;
 import android.text.TextWatcher;
 
+import modelo.TokenManager;
+
 public class SearchActivity extends AppCompatActivity {
 
     private ImageView btnBackSearch;
@@ -32,6 +34,14 @@ public class SearchActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
+
+        TokenManager tokenManager = new TokenManager(this);
+
+        if (tokenManager.getToken() == null || tokenManager.getToken().isEmpty()) {
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return;
+        }
 
         btnBackSearch = findViewById(R.id.btnBackSearch);
         etSearch = findViewById(R.id.etSearch);
