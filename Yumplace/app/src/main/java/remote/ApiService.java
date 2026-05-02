@@ -1,6 +1,7 @@
 package remote;
 
 import java.util.List;
+import java.util.Map;
 
 import dto.request.UpdateUserRequest;
 import modelo.Post;
@@ -30,7 +31,7 @@ public interface ApiService {
     Call<List<Post>> getAllPosts();
 
     @POST("posts")
-    Call<Post> createPost(@Body Post post);
+    Call<Post> createPost(@Body Map<String, Object> post);
 
     @GET("posts/user/{userId}")
     Call<List<Post>> getPostsByUser(@Path("userId") Integer userId);
