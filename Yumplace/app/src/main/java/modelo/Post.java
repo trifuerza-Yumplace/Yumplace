@@ -30,6 +30,16 @@ public class Post {
     private boolean isLiked = false;
     private List<String> ingredients;
 
+    private Integer userId;
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
     // ================= CONSTRUCTOR =================
     public Post() {
         // requerido por Gson / Retrofit

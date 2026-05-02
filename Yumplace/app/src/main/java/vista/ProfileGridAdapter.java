@@ -85,6 +85,19 @@ public class ProfileGridAdapter extends RecyclerView.Adapter<ProfileGridAdapter.
                 intent.putExtra("ingredientsText", "");
             }
 
+            // 🔥 SOLUCIÓN ROBUSTA
+            int userId = -1;
+
+            if (post.getUser() != null) {
+                userId = post.getUser().getId();
+            }
+
+            if (userId == -1 && post.getUserId() != null) {
+                userId = post.getUserId();
+            }
+
+            intent.putExtra("userId", userId);
+
             context.startActivity(intent);
         });
     }

@@ -90,8 +90,16 @@ public class PostDetailActivity extends AppCompatActivity {
                 .into(imgPost);
 
         // ================= PERFIL CLICK =================
+        int userId = getIntent().getIntExtra("userId", -1);
+
         findViewById(R.id.headerDetail).setOnClickListener(v -> {
+
+            if (userId == -1) {
+                return; // o Toast si quieres
+            }
+
             Intent intent = new Intent(PostDetailActivity.this, OtherProfileActivity.class);
+            intent.putExtra("userId", userId);
             startActivity(intent);
         });
 
