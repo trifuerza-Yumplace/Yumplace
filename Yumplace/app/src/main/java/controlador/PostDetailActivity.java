@@ -1,20 +1,24 @@
 package controlador;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.engiri.yumplace.R;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import android.content.Intent;
-import controlador.OtherProfileActivity;
+
 import modelo.TokenManager;
 
 public class PostDetailActivity extends AppCompatActivity {
 
     ImageView btnBack;
+
+    private final String DEFAULT_IMAGE =
+            "https://media.istockphoto.com/id/165598110/es/vector/solar-de-construcci%C3%B3n.jpg?s=612x612&w=0&k=20&c=CHRUil8J-yeXtkUvetIPKBdXS_mi4fBq7yLPQzpTwfU=";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,11 +33,11 @@ public class PostDetailActivity extends AppCompatActivity {
             return;
         }
 
-        // Botón para volver a la pantalla anterior
+        // ================= BACK =================
         btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> finish());
 
-        // Referencias de la vista
+        // ================= VISTAS =================
         TextView tvUsername = findViewById(R.id.tvUsernameDetail);
         ImageView imgProfile = findViewById(R.id.imgProfileDetail);
         ImageView imgPost = findViewById(R.id.imgPostDetail);
@@ -44,90 +48,106 @@ public class PostDetailActivity extends AppCompatActivity {
         TextView btnExpandSteps = findViewById(R.id.btnExpandSteps);
         ImageView imgComment = findViewById(R.id.imgCommentDetail);
 
-        // Recoger datos enviados desde el post seleccionado
+        TextView tvTitle = findViewById(R.id.tvTitleRecipe);
+        TextView tvTime = findViewById(R.id.tvTimeRecipe);
+
+        // ================= DATOS (SAFE) =================
         String username = getIntent().getStringExtra("username");
-        int profileImage = getIntent().getIntExtra("profileImage", R.drawable.user);
-        int postImage = getIntent().getIntExtra("postImage", R.drawable.pasta);
+
+        String postImage = getIntent().getStringExtra("postImage");
+        if (postImage == null || postImage.isEmpty()) {
+            postImage = DEFAULT_IMAGE;
+        }
+        final String finalPostImage = postImage;
+
         int likes = getIntent().getIntExtra("likes", 0);
-        String ingredientsText = getIntent().getStringExtra("ingredientsText");
+
         String stepsText = getIntent().getStringExtra("stepsText");
-
-        // Evitar errores si algún dato viene vacío
-        if (ingredientsText == null) ingredientsText = "";
         if (stepsText == null) stepsText = "";
+        final String finalStepsText = stepsText;
 
-        // Mostrar datos básicos de la publicación
-        tvUsername.setText(username);
-        imgProfile.setImageResource(profileImage);
-        imgPost.setImageResource(postImage);
+        String title = getIntent().getStringExtra("title");
+        if (title == null) title = "";
+
+        String time = getIntent().getStringExtra("time");
+        if (time == null) time = "";
+
+        String ingredientsText = getIntent().getStringExtra("ingredientsText");
+        if (ingredientsText == null) ingredientsText = "";
+        final String finalIngredientsText = ingredientsText;
+
+        // ================= SET DATA =================
+        tvUsername.setText(username != null ? username : "");
         tvLikes.setText(likes + " me gusta");
+        tvTitle.setText(title);
+        tvTime.setText(!time.isEmpty() ? time + " min" : "");
 
+        imgProfile.setImageResource(R.drawable.user);
+
+        Glide.with(this)
+                .load(finalPostImage)
+                .placeholder(R.drawable.pasta)
+                .into(imgPost);
+
+        // ================= PERFIL CLICK =================
         findViewById(R.id.headerDetail).setOnClickListener(v -> {
-            android.util.Log.d("CLICK", "HEADER CLICKED");
             Intent intent = new Intent(PostDetailActivity.this, OtherProfileActivity.class);
             startActivity(intent);
         });
 
-        // ===== INGREDIENTES =====
-        // Crear versión reducida de ingredientes (máximo 4 líneas)
-        String fullIngredients = ingredientsText;
-        String[] ingredientLines = fullIngredients.split("\n");
-        StringBuilder sbIngredients = new StringBuilder();
+        // ================= INGREDIENTES =================
+        String[] ingredientLines = finalIngredientsText.split("\n");
+        StringBuilder shortIngredientsBuilder = new StringBuilder();
 
         for (int i = 0; i < Math.min(4, ingredientLines.length); i++) {
-            sbIngredients.append(ingredientLines[i]).append("\n");
+            shortIngredientsBuilder.append(ingredientLines[i]).append("\n");
         }
 
-        String shortIngredients = sbIngredients.toString();
+        String shortIngredients = shortIngredientsBuilder.toString();
         final boolean[] ingredientsExpanded = {false};
 
-        // Mostrar ingredientes reducidos al entrar
         tvIngredients.setText(shortIngredients);
 
-        // Expandir o contraer ingredientes
         btnExpandIngredients.setOnClickListener(v -> {
+
             if (ingredientsExpanded[0]) {
                 tvIngredients.setText(shortIngredients);
                 btnExpandIngredients.setText("Ver más");
-                ingredientsExpanded[0] = false;
             } else {
-                tvIngredients.setText(fullIngredients);
+                tvIngredients.setText(finalIngredientsText);
                 btnExpandIngredients.setText("Ver menos");
-                ingredientsExpanded[0] = true;
             }
+
+            ingredientsExpanded[0] = !ingredientsExpanded[0];
         });
 
-        // ===== PREPARACIÓN =====
-        // Crear versión reducida de preparación (máximo 4 pasos)
-        String fullSteps = stepsText;
-        String[] stepLines = fullSteps.split("\n\n");
-        StringBuilder sbSteps = new StringBuilder();
+        // ================= PASOS =================
+        String[] stepLines = finalStepsText.split("\n");
+        StringBuilder shortStepsBuilder = new StringBuilder();
 
         for (int i = 0; i < Math.min(4, stepLines.length); i++) {
-            sbSteps.append(stepLines[i]).append("\n\n");
+            shortStepsBuilder.append(stepLines[i]).append("\n");
         }
 
-        String shortSteps = sbSteps.toString();
+        String shortSteps = shortStepsBuilder.toString();
         final boolean[] stepsExpanded = {false};
 
-        // Mostrar pasos reducidos al entrar
         tvSteps.setText(shortSteps);
 
-        // Expandir o contraer preparación
         btnExpandSteps.setOnClickListener(v -> {
+
             if (stepsExpanded[0]) {
                 tvSteps.setText(shortSteps);
                 btnExpandSteps.setText("Ver más");
-                stepsExpanded[0] = false;
             } else {
-                tvSteps.setText(fullSteps);
+                tvSteps.setText(finalStepsText);
                 btnExpandSteps.setText("Ver menos");
-                stepsExpanded[0] = true;
             }
+
+            stepsExpanded[0] = !stepsExpanded[0];
         });
 
-        // ===== COMENTARIOS =====
-        // Mostrar comentarios en panel inferior tipo Instagram
+        // ================= COMENTARIOS =================
         imgComment.setOnClickListener(v -> {
             BottomSheetDialog dialog = new BottomSheetDialog(this);
             dialog.setContentView(R.layout.bottom_comments);

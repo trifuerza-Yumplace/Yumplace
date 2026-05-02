@@ -2,6 +2,8 @@ package modelo;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
 public class Post {
 
     private int id;
@@ -26,6 +28,7 @@ public class Post {
     private int likes = 0;
     private int comments = 0;
     private boolean isLiked = false;
+    private List<String> ingredients;
 
     // ================= CONSTRUCTOR =================
     public Post() {
@@ -138,5 +141,13 @@ public class Post {
 
     public void setComments(int comments) {
         this.comments = comments;
+    }
+
+    public List<String> getIngredients() {
+        return ingredients;
+    }
+
+    public void setIngredients(List<String> ingredients) {
+        this.ingredients = ingredients;
     }
 }

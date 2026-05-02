@@ -25,6 +25,9 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     List<Post> postList;
     Context context;
 
+    private final String DEFAULT_IMAGE =
+            "https://media.istockphoto.com/id/165598110/es/vector/solar-de-construcci%C3%B3n.jpg?s=612x612&w=0&k=20&c=CHRUil8J-yeXtkUvetIPKBdXS_mi4fBq7yLPQzpTwfU=";
+
     public PostAdapter(Context context, List<Post> postList) {
         this.context = context;
         this.postList = postList;
@@ -44,10 +47,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         Post post = postList.get(position);
 
         // ================= DATOS =================
-
         holder.tvUsername.setText(post.getUsername());
         holder.tvTime.setText(post.getTime());
-
         holder.tvLikes.setText(post.getLikes() + " me gusta");
         holder.tvComments.setText("Ver los " + post.getComments() + " comentarios");
 
@@ -55,11 +56,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         String imageUrl = post.getPostImage();
 
         if (imageUrl == null || imageUrl.isEmpty()) {
-            imageUrl = "https://media.istockphoto.com/id/165598110/es/vector/solar-de-construcci%C3%B3n.jpg?s=612x612&w=0&k=20&c=CHRUil8J-yeXtkUvetIPKBdXS_mi4fBq7yLPQzpTwfU=";
+            imageUrl = DEFAULT_IMAGE;
         }
 
+        // 🔥 IMPORTANTE: variable FINAL para lambda
+        final String finalImageUrl = imageUrl;
+
         Glide.with(context)
-                .load(imageUrl)
+                .load(finalImageUrl)
                 .placeholder(R.drawable.pasta)
                 .error(R.drawable.pasta)
                 .into(holder.imgPost);
@@ -67,18 +71,20 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         // ================= PERFIL CLICK =================
         holder.tvUsername.setOnClickListener(v -> {
             Intent intent = new Intent(context, OtherProfileActivity.class);
-            intent.putExtra("userId", post.getId()); // mejor usar id real
+
+            int userId = (post.getUser() != null) ? post.getUser().getId() : -1;
+            intent.putExtra("userId", userId);
+
             context.startActivity(intent);
         });
 
-        // ================= LIKE ICON =================
+        // ================= LIKE =================
         if (post.isLiked()) {
             holder.imgLike.setImageResource(R.drawable.likellen);
         } else {
             holder.imgLike.setImageResource(R.drawable.likevac);
         }
 
-        // ================= CLICK LIKE =================
         holder.imgLike.setOnClickListener(v -> {
 
             if (post.isLiked()) {
@@ -98,11 +104,24 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             Intent intent = new Intent(context, PostDetailActivity.class);
 
             intent.putExtra("username", post.getUsername());
-            intent.putExtra("postImage", post.getPostImage());
+            intent.putExtra("postImage", finalImageUrl);
             intent.putExtra("likes", post.getLikes());
 
-            // ⚠️ steps viene como String
+            intent.putExtra("title", post.getTitle());
+
+            intent.putExtra(
+                    "time",
+                    post.getPrepTime() != null ? String.valueOf(post.getPrepTime()) : "0"
+            );
+
             intent.putExtra("stepsText", post.getSteps());
+
+            // ⚠️ si aún no tienes ingredientes en backend, evita crash
+            if (post.getIngredients() != null) {
+                intent.putExtra("ingredientsText", String.join("\n", post.getIngredients()));
+            } else {
+                intent.putExtra("ingredientsText", "");
+            }
 
             context.startActivity(intent);
         });
