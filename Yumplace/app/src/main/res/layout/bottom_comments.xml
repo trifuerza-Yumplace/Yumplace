@@ -1,30 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="12dp">
+    android:padding="12dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:text="Comentarios"
         android:textStyle="bold"
-        android:textSize="18sp"/>
+        android:textSize="18sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 
-    <ScrollView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvComments"
         android:layout_width="match_parent"
-        android:layout_height="300dp">
+        android:layout_height="300dp"/>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="ana_foodie: ¡Se ve delicioso!\n\npedro_chef: Gran receta 😍"/>
-    </ScrollView>
-
-    <EditText
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:hint="Añade un comentario..."/>
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/etComment"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:hint="Añade un comentario..."
+            android:layout_height="wrap_content"/>
+
+        <ImageView
+            android:id="@+id/btnSendComment"
+            android:src="@android:drawable/ic_menu_send"
+            android:layout_width="40dp"
+            android:layout_height="40dp"/>
+    </LinearLayout>
 
 </LinearLayout>

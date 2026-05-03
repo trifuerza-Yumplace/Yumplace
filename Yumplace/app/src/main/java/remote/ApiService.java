@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import dto.request.UpdateUserRequest;
+import modelo.Comment;
 import modelo.Post;
 import dto.request.LoginRequest;
 import dto.request.RegisterRequest;
@@ -48,7 +49,10 @@ public interface ApiService {
     Call<Void> unlikePost(@Path("id") Integer id);
 
     @GET("posts/{id}/comments")
-    Call<List<Object>> getComments(@Path("id") Integer postId); // Ajustar tipo según tu DTO Comment
+    Call<List<Comment>> getComments(@Path("id") Integer postId);
+
+    @POST("posts/{id}/comments")
+    Call<Comment> addComment(@Path("id") Integer postId, @Body Comment comment);
 
     @GET("posts/{id}/ingredients")
     Call<List<RecipeIngredientResponse>> getPostIngredients(@Path("id") Integer postId);
