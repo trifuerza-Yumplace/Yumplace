@@ -126,7 +126,6 @@ public class FeedActivity extends AppCompatActivity {
 
         if (!allPosts.isEmpty()) {
 
-            // 🔀 nuevo orden cada vez que entras
             java.util.Collections.shuffle(allPosts, new Random(System.currentTimeMillis()));
 
             postList.clear();
@@ -150,9 +149,24 @@ public class FeedActivity extends AppCompatActivity {
                 if (response.isSuccessful() && response.body() != null) {
 
                     allPosts.clear();
-                    allPosts.addAll(response.body());
 
-                    // 🔀 primera aleatorización
+                    // ✅ AQUÍ ESTÁ EL FIX REAL
+                    for (Post post : response.body()) {
+
+                        // seguridad básica
+                        if (post.getLikes() < 0) {
+                            post.setLikes(0);
+                        }
+
+                        // si backend no manda usuario o estado de like
+                        if (post.getUser() == null) {
+                            post.setLikedByUser(false);
+                        }
+
+                        allPosts.add(post);
+                    }
+
+                    // 🔀 aleatorización inicial
                     java.util.Collections.shuffle(allPosts, new Random(System.currentTimeMillis()));
 
                     postList.clear();

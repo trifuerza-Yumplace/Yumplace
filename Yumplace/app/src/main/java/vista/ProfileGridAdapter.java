@@ -10,13 +10,14 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.engiri.yumplace.R;
 import com.bumptech.glide.Glide;
+import com.engiri.yumplace.R;
 
 import java.util.List;
 
 import controlador.PostDetailActivity;
 import modelo.Post;
+import modelo.RecipeIngredientResponse;
 
 public class ProfileGridAdapter extends RecyclerView.Adapter<ProfileGridAdapter.ViewHolder> {
 
@@ -78,14 +79,27 @@ public class ProfileGridAdapter extends RecyclerView.Adapter<ProfileGridAdapter.
             intent.putExtra("stepsText",
                     post.getSteps() != null ? post.getSteps() : "");
 
+            // ================= FIX INGREDIENTES =================
             if (post.getIngredients() != null) {
-                intent.putExtra("ingredientsText",
-                        String.join("\n", post.getIngredients()));
+
+                StringBuilder ingredientsText = new StringBuilder();
+
+                for (RecipeIngredientResponse ri : post.getIngredients()) {
+                    if (ri != null && ri.getIngredient() != null) {
+                        ingredientsText
+                                .append("• ")
+                                .append(ri.getIngredient().getName())
+                                .append("\n");
+                    }
+                }
+
+                intent.putExtra("ingredientsText", ingredientsText.toString());
+
             } else {
                 intent.putExtra("ingredientsText", "");
             }
 
-            // 🔥 SOLUCIÓN ROBUSTA
+            // ================= USER ID =================
             int userId = -1;
 
             if (post.getUser() != null) {

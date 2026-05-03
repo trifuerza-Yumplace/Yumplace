@@ -13,6 +13,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.util.List;
 
+import modelo.RecipeIngredientResponse;
 import modelo.TokenManager;
 import remote.ApiService;
 import remote.RetrofitClient;
@@ -23,6 +24,9 @@ import retrofit2.Response;
 public class PostDetailActivity extends AppCompatActivity {
 
     ImageView btnBack;
+
+    private int likes;
+    private boolean likedByUser;
 
     private final String DEFAULT_IMAGE =
             "https://media.istockphoto.com/id/165598110/es/vector/solar-de-construcci%C3%B3n.jpg?s=612x612&w=0&k=20&c=CHRUil8J-yeXtkUvetIPKBdXS_mi4fBq7yLPQzpTwfU=";
@@ -49,11 +53,15 @@ public class PostDetailActivity extends AppCompatActivity {
         ImageView imgProfile = findViewById(R.id.imgProfileDetail);
         ImageView imgPost = findViewById(R.id.imgPostDetail);
         TextView tvLikes = findViewById(R.id.tvLikesDetail);
+
         TextView tvIngredients = findViewById(R.id.tvIngredients);
         TextView btnExpandIngredients = findViewById(R.id.btnExpandIngredients);
+
         TextView tvSteps = findViewById(R.id.tvSteps);
         TextView btnExpandSteps = findViewById(R.id.btnExpandSteps);
+
         ImageView imgComment = findViewById(R.id.imgCommentDetail);
+        ImageView imgLike = findViewById(R.id.imgLikeDetail);
 
         TextView tvTitle = findViewById(R.id.tvTitleRecipe);
         TextView tvTime = findViewById(R.id.tvTimeRecipe);
@@ -65,13 +73,15 @@ public class PostDetailActivity extends AppCompatActivity {
         if (postImage == null || postImage.isEmpty()) {
             postImage = DEFAULT_IMAGE;
         }
-        final String finalPostImage = postImage;
 
-        int likes = getIntent().getIntExtra("likes", 0);
+        int postId = getIntent().getIntExtra("postId", -1);
+        int userId = getIntent().getIntExtra("userId", -1);
+
+        likes = getIntent().getIntExtra("likes", 0);
+        likedByUser = getIntent().getBooleanExtra("likedByUser", false);
 
         String stepsText = getIntent().getStringExtra("stepsText");
         if (stepsText == null) stepsText = "";
-        final String finalStepsText = stepsText;
 
         String title = getIntent().getStringExtra("title");
         if (title == null) title = "";
@@ -79,14 +89,7 @@ public class PostDetailActivity extends AppCompatActivity {
         String time = getIntent().getStringExtra("time");
         if (time == null) time = "";
 
-        String ingredientsText = getIntent().getStringExtra("ingredientsText");
-        if (ingredientsText == null) ingredientsText = "";
-        final String finalIngredientsText = ingredientsText;
-
-        int userId = getIntent().getIntExtra("userId", -1);
-        int postId = getIntent().getIntExtra("postId", -1); // 🔥 NUEVO
-
-        // ================= SET DATA =================
+        // ================= SET UI =================
         tvUsername.setText(username != null ? username : "");
         tvLikes.setText(likes + " me gusta");
         tvTitle.setText(title);
@@ -95,87 +98,73 @@ public class PostDetailActivity extends AppCompatActivity {
         imgProfile.setImageResource(R.drawable.user);
 
         Glide.with(this)
-                .load(finalPostImage)
+                .load(postImage)
                 .placeholder(R.drawable.pasta)
                 .into(imgPost);
 
-        // ================= PERFIL CLICK =================
-        findViewById(R.id.headerDetail).setOnClickListener(v -> {
+        imgLike.setImageResource(likedByUser ? R.drawable.likellen : R.drawable.likevac);
 
+        // ================= LIKE =================
+        ApiService api = RetrofitClient.getApiService(this);
+
+        imgLike.setOnClickListener(v -> {
+
+            if (likedByUser) {
+
+                api.unlikePost(postId).enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            likedByUser = false;
+                            likes--;
+                            imgLike.setImageResource(R.drawable.likevac);
+                            tvLikes.setText(likes + " me gusta");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {}
+                });
+
+            } else {
+
+                api.likePost(postId).enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        if (response.isSuccessful()) {
+                            likedByUser = true;
+                            likes++;
+                            imgLike.setImageResource(R.drawable.likellen);
+                            tvLikes.setText(likes + " me gusta");
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {}
+                });
+            }
+        });
+
+        // ================= PERFIL =================
+        findViewById(R.id.headerDetail).setOnClickListener(v -> {
             if (userId == -1) return;
 
-            Intent intent = new Intent(PostDetailActivity.this, OtherProfileActivity.class);
+            Intent intent = new Intent(this, OtherProfileActivity.class);
             intent.putExtra("userId", userId);
             startActivity(intent);
         });
 
-        // ================= COMENTARIOS (RETROFIT) =================
-        ApiService api = RetrofitClient.getApiService(this);
-
-        if (postId != -1) {
-            api.getComments(postId).enqueue(new Callback<List<Object>>() {
-                @Override
-                public void onResponse(Call<List<Object>> call, Response<List<Object>> response) {
-
-                    if (response.isSuccessful() && response.body() != null) {
-
-                        int totalComments = response.body().size();
-
-                        imgComment.setOnClickListener(v -> {
-                            BottomSheetDialog dialog = new BottomSheetDialog(PostDetailActivity.this);
-                            dialog.setContentView(R.layout.bottom_comments);
-                            dialog.show();
-                        });
-
-                        // opcional: si quieres mostrar contador
-                        // tvComments.setText(totalComments + " comentarios");
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<List<Object>> call, Throwable t) {
-                    // silencioso o log
-                }
-            });
-        } else {
-
-            imgComment.setOnClickListener(v -> {
-                BottomSheetDialog dialog = new BottomSheetDialog(PostDetailActivity.this);
-                dialog.setContentView(R.layout.bottom_comments);
-                dialog.show();
-            });
-        }
-
-        // ================= INGREDIENTES =================
-        String[] ingredientLines = finalIngredientsText.split("\n");
-        StringBuilder shortIngredientsBuilder = new StringBuilder();
-
-        for (int i = 0; i < Math.min(4, ingredientLines.length); i++) {
-            shortIngredientsBuilder.append(ingredientLines[i]).append("\n");
-        }
-
-        String shortIngredients = shortIngredientsBuilder.toString();
-        final boolean[] ingredientsExpanded = {false};
-
-        tvIngredients.setText(shortIngredients);
-
-        btnExpandIngredients.setOnClickListener(v -> {
-
-            if (ingredientsExpanded[0]) {
-                tvIngredients.setText(shortIngredients);
-                btnExpandIngredients.setText("Ver más");
-            } else {
-                tvIngredients.setText(finalIngredientsText);
-                btnExpandIngredients.setText("Ver menos");
-            }
-
-            ingredientsExpanded[0] = !ingredientsExpanded[0];
+        // ================= COMENTARIOS =================
+        imgComment.setOnClickListener(v -> {
+            BottomSheetDialog dialog = new BottomSheetDialog(this);
+            dialog.setContentView(R.layout.bottom_comments);
+            dialog.show();
         });
 
         // ================= PASOS =================
-        String[] stepLines = finalStepsText.split("\n");
-        StringBuilder shortStepsBuilder = new StringBuilder();
+        String[] stepLines = stepsText.split("\n");
 
+        StringBuilder shortStepsBuilder = new StringBuilder();
         for (int i = 0; i < Math.min(4, stepLines.length); i++) {
             shortStepsBuilder.append(stepLines[i]).append("\n");
         }
@@ -183,10 +172,10 @@ public class PostDetailActivity extends AppCompatActivity {
         String shortSteps = shortStepsBuilder.toString();
         final boolean[] stepsExpanded = {false};
 
-        tvSteps.setText(shortSteps);
+        tvSteps.setText(shortSteps.isEmpty() ? stepsText : shortSteps);
 
+        String finalStepsText = stepsText;
         btnExpandSteps.setOnClickListener(v -> {
-
             if (stepsExpanded[0]) {
                 tvSteps.setText(shortSteps);
                 btnExpandSteps.setText("Ver más");
@@ -194,8 +183,76 @@ public class PostDetailActivity extends AppCompatActivity {
                 tvSteps.setText(finalStepsText);
                 btnExpandSteps.setText("Ver menos");
             }
-
             stepsExpanded[0] = !stepsExpanded[0];
         });
+
+        // ================= INGREDIENTES (BACKEND REAL) =================
+        if (postId != -1) {
+
+            api.getPostIngredients(postId).enqueue(new Callback<List<RecipeIngredientResponse>>() {
+                @Override
+                public void onResponse(Call<List<RecipeIngredientResponse>> call,
+                                       Response<List<RecipeIngredientResponse>> response) {
+
+                    if (!response.isSuccessful() || response.body() == null) {
+                        tvIngredients.setText("Sin ingredientes");
+                        return;
+                    }
+
+                    List<RecipeIngredientResponse> ingredients = response.body();
+
+                    StringBuilder sb = new StringBuilder();
+
+                    for (RecipeIngredientResponse ri : ingredients) {
+                        if (ri != null && ri.getIngredient() != null) {
+
+                            sb.append("• ")
+                                    .append(ri.getIngredient().getName());
+
+                            if (ri.getQuantity() != null && !ri.getQuantity().isEmpty()) {
+                                sb.append(" - ").append(ri.getQuantity());
+                            }
+
+                            sb.append("\n");
+                        }
+                    }
+
+                    String finalText = sb.toString();
+                    tvIngredients.setText(finalText.isEmpty() ? "Sin ingredientes" : finalText);
+
+                    // ===== EXPAND =====
+                    String[] lines = finalText.split("\n");
+
+                    StringBuilder shortBuilder = new StringBuilder();
+                    for (int i = 0; i < Math.min(4, lines.length); i++) {
+                        shortBuilder.append(lines[i]).append("\n");
+                    }
+
+                    String shortText = shortBuilder.toString();
+                    final boolean[] expanded = {false};
+
+                    tvIngredients.setText(shortText.isEmpty() ? finalText : shortText);
+
+                    btnExpandIngredients.setOnClickListener(v -> {
+                        if (expanded[0]) {
+                            tvIngredients.setText(shortText);
+                            btnExpandIngredients.setText("Ver más");
+                        } else {
+                            tvIngredients.setText(finalText);
+                            btnExpandIngredients.setText("Ver menos");
+                        }
+                        expanded[0] = !expanded[0];
+                    });
+                }
+
+                @Override
+                public void onFailure(Call<List<RecipeIngredientResponse>> call, Throwable t) {
+                    tvIngredients.setText("Error cargando ingredientes");
+                }
+            });
+
+        } else {
+            tvIngredients.setText("Sin ingredientes");
+        }
     }
 }

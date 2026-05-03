@@ -2,12 +2,12 @@ package vista;
 
 import android.content.Context;
 import android.content.Intent;
-import android.widget.Toast;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,6 +20,7 @@ import java.util.List;
 import controlador.OtherProfileActivity;
 import controlador.PostDetailActivity;
 import modelo.Post;
+import modelo.RecipeIngredientResponse;
 import remote.ApiService;
 import remote.RetrofitClient;
 import retrofit2.Call;
@@ -33,7 +34,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     ApiService apiService;
 
     private final String DEFAULT_IMAGE =
-            "https://media.istockphoto.com/id/165598110/es/vector/solar-de-construcci%C3%B3n.jpg?s=612x612&w=0&k=20&c=CHRUil8J-yeXtkUvetIPKBdXS_mi4fBq7yLPQzpTwfU=";
+            "https://media.istockphoto.com/id/165598110/es/vector/solar-de-construcción.jpg?s=612x612&w=0&k=20&c=CHRUil8J-yeXtkUvetIPKBdXS_mi4fBq7yLPQzpTwfU=";
 
     public PostAdapter(Context context, List<Post> postList) {
         this.context = context;
@@ -54,13 +55,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
         Post post = postList.get(position);
 
+        // ================= TEXTO =================
         holder.tvUsername.setText(post.getUsername());
         holder.tvTime.setText(post.getTime());
         holder.tvLikes.setText(post.getLikes() + " me gusta");
         holder.tvComments.setText("Ver los " + post.getComments() + " comentarios");
 
+        // ================= IMAGEN =================
         String imageUrl = post.getPostImage();
-
         if (imageUrl == null || imageUrl.isEmpty()) {
             imageUrl = DEFAULT_IMAGE;
         }
@@ -73,75 +75,75 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                 .error(R.drawable.pasta)
                 .into(holder.imgPost);
 
-        // ================= PERFIL CLICK =================
+        // ================= PERFIL =================
         holder.tvUsername.setOnClickListener(v -> {
             Intent intent = new Intent(context, OtherProfileActivity.class);
-
             int userId = (post.getUser() != null) ? post.getUser().getId() : -1;
             intent.putExtra("userId", userId);
-
             context.startActivity(intent);
         });
 
-        // ================= LIKE UI =================
+        // ================= ICONO LIKE =================
         if (post.isLiked()) {
             holder.imgLike.setImageResource(R.drawable.likellen);
         } else {
             holder.imgLike.setImageResource(R.drawable.likevac);
         }
 
-        // ================= LIKE REAL (RETROFIT) =================
+        // ================= LIKE LOGIC =================
         holder.imgLike.setOnClickListener(v -> {
 
-            apiService.likePost(post.getId()).enqueue(new Callback<Void>() {
-                @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {
+            boolean currentlyLiked = post.isLiked();
+            ApiService api = RetrofitClient.getApiService(context);
 
-                    if (response.isSuccessful()) {
+            if (currentlyLiked) {
 
-                        // 🔥 actualizar UI SOLO si backend responde OK
-                        holder.imgLike.setOnClickListener(v -> {
+                api.unlikePost(post.getId()).enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
 
-                            ApiService api = RetrofitClient.getApiService(context);
+                        if (response.isSuccessful()) {
 
-                            int postId = post.getId();
+                            int adapterPosition = holder.getAdapterPosition();
+                            if (adapterPosition == RecyclerView.NO_POSITION) return;
 
-                            api.likePost(postId).enqueue(new Callback<Void>() {
-                                @Override
-                                public void onResponse(Call<Void> call, Response<Void> response) {
+                            post.setLiked(false);
+                            post.setLikes(Math.max(0, post.getLikes() - 1));
 
-                                    if (response.isSuccessful()) {
-
-                                        // sincronizar UI SOLO si backend OK
-                                        if (post.isLiked()) {
-                                            post.setLiked(false);
-                                            post.setLikes(post.getLikes() - 1);
-                                        } else {
-                                            post.setLiked(true);
-                                            post.setLikes(post.getLikes() + 1);
-                                        }
-
-                                        notifyItemChanged(position);
-                                    }
-                                }
-
-                                @Override
-                                public void onFailure(Call<Void> call, Throwable t) {
-                                    // opcional log
-                                }
-                            });
-                        });
-
-                    } else {
-                        Toast.makeText(context, "Error al dar like", Toast.LENGTH_SHORT).show();
+                            notifyItemChanged(adapterPosition);
+                        }
                     }
-                }
 
-                @Override
-                public void onFailure(Call<Void> call, Throwable t) {
-                    Toast.makeText(context, "Error de conexión", Toast.LENGTH_SHORT).show();
-                }
-            });
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        Toast.makeText(context, "Error de conexión", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+            } else {
+
+                api.likePost(post.getId()).enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+
+                        if (response.isSuccessful()) {
+
+                            int adapterPosition = holder.getAdapterPosition();
+                            if (adapterPosition == RecyclerView.NO_POSITION) return;
+
+                            post.setLiked(true);
+                            post.setLikes(post.getLikes() + 1);
+
+                            notifyItemChanged(adapterPosition);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        Toast.makeText(context, "Error de conexión", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
         });
 
         // ================= DETALLE =================
@@ -154,6 +156,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             intent.putExtra("likes", post.getLikes());
             intent.putExtra("title", post.getTitle());
             intent.putExtra("postId", post.getId());
+            intent.putExtra("likedByUser", post.isLiked());
 
             intent.putExtra(
                     "time",
@@ -162,13 +165,26 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
             intent.putExtra("stepsText", post.getSteps());
 
+            // ================= INGREDIENTES =================
             if (post.getIngredients() != null) {
-                intent.putExtra("ingredientsText", String.join("\n", post.getIngredients()));
+
+                StringBuilder ingredientsText = new StringBuilder();
+
+                for (RecipeIngredientResponse ri : post.getIngredients()) {
+                    if (ri != null && ri.getIngredient() != null) {
+                        ingredientsText
+                                .append("• ")
+                                .append(ri.getIngredient().getName())
+                                .append("\n");
+                    }
+                }
+
+                intent.putExtra("ingredientsText", ingredientsText.toString());
+
             } else {
                 intent.putExtra("ingredientsText", "");
             }
 
-            // 🔥 IMPORTANTE PARA PERFIL
             if (post.getUser() != null) {
                 intent.putExtra("userId", post.getUser().getId());
             }

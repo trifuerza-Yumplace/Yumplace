@@ -25,29 +25,22 @@ public class Post {
     private User user;
 
     // ================= BACKEND STATE =================
-    private int likes = 0;
-    private int comments = 0;
 
-    // 🔥 NUEVO (estado real del backend)
+    // 🔥 IMPORTANTE: ahora viene del backend como contador real
+    @SerializedName("likesCount")
+    private int likes;
+
+    private int comments;
+
+    // 🔥 estado real del usuario actual
     @SerializedName("likedByUser")
     private boolean likedByUser;
 
-    private List<String> ingredients;
-
+    private List<RecipeIngredientResponse> ingredients;
     private Integer userId;
 
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-
     // ================= CONSTRUCTOR =================
-    public Post() {
-        // requerido por Gson / Retrofit
-    }
+    public Post() {}
 
     // ================= GETTERS =================
 
@@ -99,23 +92,26 @@ public class Post {
         return user;
     }
 
-    public List<String> getIngredients() {
+    public List<RecipeIngredientResponse> getIngredients() {
         return ingredients;
     }
 
-    // ================= ❤️ LIKE STATE (PRO FIX) =================
+    public Integer getUserId() {
+        return userId;
+    }
 
-    // 👉 ESTE es el que usa la app
+    // ================= LIKE STATE =================
+
     public boolean isLiked() {
+        return likedByUser;
+    }
+
+    public boolean getLikedByUser() {
         return likedByUser;
     }
 
     public void setLiked(boolean liked) {
         this.likedByUser = liked;
-    }
-
-    public boolean getLikedByUser() {
-        return likedByUser;
     }
 
     public void setLikedByUser(boolean likedByUser) {
@@ -172,7 +168,8 @@ public class Post {
         this.comments = comments;
     }
 
-    public void setIngredients(List<String> ingredients) {
-        this.ingredients = ingredients;
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 }

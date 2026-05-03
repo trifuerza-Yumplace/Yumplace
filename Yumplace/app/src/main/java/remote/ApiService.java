@@ -9,6 +9,7 @@ import dto.request.LoginRequest;
 import dto.request.RegisterRequest;
 import dto.response.AuthResponse;
 import dto.response.UserResponse;
+import modelo.RecipeIngredientResponse;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -43,9 +44,14 @@ public interface ApiService {
     @POST("posts/{id}/like")
     Call<Void> likePost(@Path("id") Integer id);
 
+    @DELETE("posts/{id}/unlike")
+    Call<Void> unlikePost(@Path("id") Integer id);
+
     @GET("posts/{id}/comments")
     Call<List<Object>> getComments(@Path("id") Integer postId); // Ajustar tipo según tu DTO Comment
 
+    @GET("posts/{id}/ingredients")
+    Call<List<RecipeIngredientResponse>> getPostIngredients(@Path("id") Integer postId);
     // ===== USUARIOS =====
     @GET("users/{id}")
     Call<UserResponse> getUserProfile(@Path("id") Integer id);
