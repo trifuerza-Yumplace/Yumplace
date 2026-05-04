@@ -2,6 +2,7 @@ package controlador;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.ImageView;
@@ -38,10 +39,13 @@ public class OtherProfileActivity extends AppCompatActivity {
 
     private TextView tvOtherUsername, tvOtherName, tvOtherBio;
     private TextView tvOtherPostsCount, tvOtherFollowersCount, tvOtherFollowingCount;
+    private TextView tvNoPosts;
+
     private Button btnFollow;
 
     private boolean isFollowing = false;
     private int userId;
+
     private ImageView imgOtherProfile;
 
     @Override
@@ -59,16 +63,21 @@ public class OtherProfileActivity extends AppCompatActivity {
 
         apiService = RetrofitClient.getApiService(this);
 
+        // ================= VIEWS =================
         tvOtherUsername = findViewById(R.id.tvOtherUsername);
         tvOtherName = findViewById(R.id.tvOtherName);
         tvOtherBio = findViewById(R.id.tvOtherBio);
         tvOtherPostsCount = findViewById(R.id.tvOtherPostsCount);
         tvOtherFollowersCount = findViewById(R.id.tvOtherFollowersCount);
         tvOtherFollowingCount = findViewById(R.id.tvOtherFollowingCount);
+        tvNoPosts = findViewById(R.id.tvNoPosts);
+
         btnFollow = findViewById(R.id.btnFollow);
         btnFollow.setText("Seguir");
+
         imgOtherProfile = findViewById(R.id.imgOtherProfile);
 
+        // ================= RECYCLER =================
         recyclerView = findViewById(R.id.recyclerGrid);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
 
@@ -76,23 +85,28 @@ public class OtherProfileActivity extends AppCompatActivity {
         adapter = new ProfileGridAdapter(this, postList);
         recyclerView.setAdapter(adapter);
 
+        // ================= BOTTOM NAV =================
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
         bottomNav.setSelectedItemId(R.id.nav_profile);
 
         bottomNav.setOnItemSelectedListener(item -> {
+
             int id = item.getItemId();
 
             if (id == R.id.nav_home) {
                 startActivity(new Intent(this, FeedActivity.class));
                 finish();
                 return true;
+
             } else if (id == R.id.nav_search) {
                 startActivity(new Intent(this, SearchActivity.class));
                 finish();
                 return true;
+
             } else if (id == R.id.nav_add) {
                 startActivity(new Intent(this, PublicPostActivity.class));
                 return true;
+
             } else if (id == R.id.nav_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
                 finish();
@@ -102,6 +116,7 @@ public class OtherProfileActivity extends AppCompatActivity {
             return false;
         });
 
+        // ================= USER ID =================
         userId = getIntent().getIntExtra("userId", -1);
 
         if (userId == -1) {
@@ -117,21 +132,25 @@ public class OtherProfileActivity extends AppCompatActivity {
         configurarBotonFollow();
     }
 
+    // ================= PERFIL =================
     private void cargarPerfilUsuario(int userId) {
+
         apiService.getUserProfile(userId).enqueue(new Callback<UserResponse>() {
             @Override
             public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
+
                 if (response.isSuccessful() && response.body() != null) {
+
                     UserResponse user = response.body();
 
                     tvOtherUsername.setText(user.getUsername());
                     tvOtherName.setText(user.getUsername());
 
-                    if (user.getBiography() != null && !user.getBiography().isEmpty()) {
-                        tvOtherBio.setText(user.getBiography());
-                    } else {
-                        tvOtherBio.setText("Sin biografía");
-                    }
+                    tvOtherBio.setText(
+                            user.getBiography() != null && !user.getBiography().isEmpty()
+                                    ? user.getBiography()
+                                    : "Sin biografía"
+                    );
 
                     String photoUrl = user.getProfilePhoto();
 
@@ -145,43 +164,81 @@ public class OtherProfileActivity extends AppCompatActivity {
                     }
 
                 } else {
-                    Toast.makeText(OtherProfileActivity.this, "Error perfil: " + response.code(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(OtherProfileActivity.this,
+                            "Error perfil: " + response.code(),
+                            Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<UserResponse> call, Throwable t) {
-                Toast.makeText(OtherProfileActivity.this, "Error conexión perfil", Toast.LENGTH_SHORT).show();
+                Toast.makeText(OtherProfileActivity.this,
+                        "Error conexión perfil",
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+    // ================= POSTS (MEJORADO) =================
     private void cargarPostsUsuario(int userId) {
+
         apiService.getPostsByUser(userId).enqueue(new Callback<List<Post>>() {
+
             @Override
             public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    postList.clear();
-                    postList.addAll(response.body());
-                    adapter.notifyDataSetChanged();
 
-                    tvOtherPostsCount.setText(String.valueOf(postList.size()));
+                postList.clear();
+
+                if (response.isSuccessful() && response.body() != null) {
+
+                    List<Post> posts = response.body();
+
+                    if (!posts.isEmpty()) {
+                        postList.addAll(posts);
+                        tvNoPosts.setVisibility(View.GONE);
+                    } else {
+                        tvNoPosts.setVisibility(View.VISIBLE);
+                    }
+
+                    tvOtherPostsCount.setText(String.valueOf(posts.size()));
+
                 } else {
-                    Toast.makeText(OtherProfileActivity.this, "Error posts: " + response.code(), Toast.LENGTH_SHORT).show();
+
+                    tvNoPosts.setVisibility(View.VISIBLE);
+                    tvOtherPostsCount.setText("0");
+
+                    Toast.makeText(OtherProfileActivity.this,
+                            "Error posts: " + response.code(),
+                            Toast.LENGTH_SHORT).show();
                 }
+
+                adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onFailure(Call<List<Post>> call, Throwable t) {
-                Toast.makeText(OtherProfileActivity.this, "Error conexión posts", Toast.LENGTH_SHORT).show();
+
+                postList.clear();
+                adapter.notifyDataSetChanged();
+
+                tvNoPosts.setVisibility(View.VISIBLE);
+                tvOtherPostsCount.setText("0");
+
+                Toast.makeText(OtherProfileActivity.this,
+                        "Error conexión posts",
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+    // ================= FOLLOWERS =================
     private void cargarSeguidores(int userId) {
+
         apiService.getFollowers(userId).enqueue(new Callback<List<UserResponse>>() {
+
             @Override
             public void onResponse(Call<List<UserResponse>> call, Response<List<UserResponse>> response) {
+
                 if (response.isSuccessful() && response.body() != null) {
                     tvOtherFollowersCount.setText(String.valueOf(response.body().size()));
                 }
@@ -189,15 +246,21 @@ public class OtherProfileActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<List<UserResponse>> call, Throwable t) {
-                Toast.makeText(OtherProfileActivity.this, "Error seguidores", Toast.LENGTH_SHORT).show();
+                Toast.makeText(OtherProfileActivity.this,
+                        "Error seguidores",
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+    // ================= FOLLOWING =================
     private void cargarSeguidos(int userId) {
+
         apiService.getFollowing(userId).enqueue(new Callback<List<UserResponse>>() {
+
             @Override
             public void onResponse(Call<List<UserResponse>> call, Response<List<UserResponse>> response) {
+
                 if (response.isSuccessful() && response.body() != null) {
                     tvOtherFollowingCount.setText(String.valueOf(response.body().size()));
                 }
@@ -205,27 +268,31 @@ public class OtherProfileActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<List<UserResponse>> call, Throwable t) {
-                Toast.makeText(OtherProfileActivity.this, "Error seguidos", Toast.LENGTH_SHORT).show();
+                Toast.makeText(OtherProfileActivity.this,
+                        "Error seguidos",
+                        Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+    // ================= FOLLOW (MISMO COMPORTAMIENTO QUE TENÍAS) =================
     private void configurarBotonFollow() {
+
         btnFollow.setOnClickListener(v -> {
 
             int seguidoresActuales = Integer.parseInt(tvOtherFollowersCount.getText().toString());
 
             if (!isFollowing) {
+
                 isFollowing = true;
                 btnFollow.setText("Siguiendo");
                 tvOtherFollowersCount.setText(String.valueOf(seguidoresActuales + 1));
-                Toast.makeText(this, "Ahora sigues a este usuario", Toast.LENGTH_SHORT).show();
 
             } else {
+
                 isFollowing = false;
                 btnFollow.setText("Seguir");
                 tvOtherFollowersCount.setText(String.valueOf(seguidoresActuales - 1));
-                Toast.makeText(this, "Has dejado de seguir", Toast.LENGTH_SHORT).show();
             }
         });
     }

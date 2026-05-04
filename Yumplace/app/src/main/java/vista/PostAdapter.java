@@ -56,7 +56,9 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         Post post = postList.get(position);
 
         // ================= TEXTO =================
-        holder.tvUsername.setText(post.getUsername());
+        holder.tvUsername.setText(
+                post.getUser() != null ? post.getUser().getUsername() : "Usuario"
+        );
         holder.tvTime.setText(post.getTime());
         holder.tvLikes.setText(post.getLikes() + " me gusta");
         holder.tvComments.setText("Ver los " + post.getComments() + " comentarios");

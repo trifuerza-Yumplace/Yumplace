@@ -35,9 +35,8 @@ public interface ApiService {
     @POST("posts")
     Call<Post> createPost(@Body Map<String, Object> post);
 
-    @GET("posts/user/{userId}")
-    Call<List<Post>> getPostsByUser(@Path("userId") Integer userId);
-
+    @GET("users/{id}/posts")
+    Call<List<Post>> getPostsByUser(@Path("id") Integer userId);
     @GET("posts/me")
     Call<List<Post>> getMyPosts();
 
