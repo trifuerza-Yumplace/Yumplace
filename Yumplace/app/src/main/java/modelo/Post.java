@@ -19,6 +19,8 @@ public class Post {
 
     private String steps;
 
+    private Category category;
+
     @SerializedName("publicationDate")
     private String time;
 
@@ -98,6 +100,10 @@ public class Post {
 
     public Integer getUserId() {
         return userId;
+    }
+
+    public Category getCategory() {
+        return category;
     }
 
     // ================= LIKE STATE =================

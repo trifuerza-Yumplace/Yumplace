@@ -4,9 +4,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,6 +26,7 @@ import java.util.List;
 import android.text.Editable;
 import android.text.TextWatcher;
 
+import modelo.Category;
 import modelo.Post;
 import modelo.RecipeIngredientResponse;
 import modelo.TokenManager;
@@ -37,8 +42,14 @@ public class SearchActivity extends AppCompatActivity {
     private EditText etSearch;
     private GridLayout gridRecipes;
     private BottomNavigationView bottomNavigation;
-
     private List<Post> allPosts = new ArrayList<>();
+    private Spinner spinnerCategories;
+    private List<Category> categoriesList = new ArrayList<>();
+    private String selectedCategory = "Todas las categorías"; // Unificado a español
+
+    // Nuevas variables
+    private TextView tvNoResults;
+    private Button btnClearFilters;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,101 +64,108 @@ public class SearchActivity extends AppCompatActivity {
             return;
         }
 
+        // ================= INITIALIZE VIEWS =================
         btnBackSearch = findViewById(R.id.btnBackSearch);
         etSearch = findViewById(R.id.etSearch);
         gridRecipes = findViewById(R.id.gridRecipes);
         bottomNavigation = findViewById(R.id.bottomNavigation);
+        spinnerCategories = findViewById(R.id.spinnerCategories);
+        tvNoResults = findViewById(R.id.tvNoResults);
+        btnClearFilters = findViewById(R.id.btnClearFilters);
 
-        // ================= BACK BUTTON =================
+        // Ocultar limpiar filtros al inicio
+        btnClearFilters.setVisibility(View.GONE);
+
         btnBackSearch.setOnClickListener(v -> finish());
 
-        // ================= LOAD POSTS FROM API (FIX REAL) =================
+        // ================= CLEAN FILTERS LOGIC =================
+        btnClearFilters.setOnClickListener(v -> {
+            etSearch.setText("");
+            spinnerCategories.setSelection(0);
+            selectedCategory = "Todas las categorías";
+            filtrarRecetas("");
+        });
+
         ApiService api = RetrofitClient.getApiService(this);
 
+        // 1. CARGAR POSTS
         api.getAllPosts().enqueue(new Callback<List<Post>>() {
             @Override
             public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
-
                 if (response.isSuccessful() && response.body() != null) {
-
                     allPosts = response.body();
-
-                    // random como Feed
                     Collections.shuffle(allPosts);
 
                     cargarPosts(allPosts);
+
+                    filtrarRecetas(etSearch.getText().toString());
                 }
             }
-
             @Override
             public void onFailure(Call<List<Post>> call, Throwable t) {
                 t.printStackTrace();
             }
         });
 
-        // ================= SEARCH FILTER =================
+        // 2. CARGAR CATEGORÍAS
+        api.getAllCategories().enqueue(new Callback<List<Category>>() {
+            @Override
+            public void onResponse(Call<List<Category>> call, Response<List<Category>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    categoriesList = response.body();
+                    configureSpinner();
+                }
+            }
+            @Override
+            public void onFailure(Call<List<Category>> call, Throwable t) {
+                t.printStackTrace();
+            }
+        });
+
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 filtrarRecetas(s.toString());
             }
-
             @Override
             public void afterTextChanged(Editable s) {}
         });
 
-        // ================= BOTTOM NAV =================
         bottomNavigation.setSelectedItemId(R.id.nav_search);
-
         bottomNavigation.setOnItemSelectedListener(item -> {
-
             int id = item.getItemId();
-
             if (id == R.id.nav_home) {
                 startActivity(new Intent(this, FeedActivity.class));
                 finish();
                 return true;
-
             } else if (id == R.id.nav_search) {
                 return true;
-
-            } else if (id == R.id.nav_add) {
-                return true;
-
             } else if (id == R.id.nav_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
                 finish();
                 return true;
             }
-
             return false;
         });
     }
 
-    // ================= LOAD GRID =================
+    // ================= LOAD GRID (TUS NOMBRES ORIGINALES) =================
     private void cargarPosts(List<Post> posts) {
-
         LayoutInflater inflater = LayoutInflater.from(this);
         gridRecipes.removeAllViews();
 
         for (Post post : posts) {
-
             View itemView = inflater.inflate(R.layout.item_search_recipe, gridRecipes, false);
 
             ImageView imgRecipe = itemView.findViewById(R.id.imgRecipe);
             TextView tvRecipeName = itemView.findViewById(R.id.tvRecipeName);
             TextView tvRecipeLikes = itemView.findViewById(R.id.tvRecipeLikes);
 
-            // TITLE
             tvRecipeName.setText(post.getTitle());
-
-            // LIKES
             tvRecipeLikes.setText(post.getLikes() + " me gusta");
 
-            // IMAGE
             if (post.getPostImage() != null && !post.getPostImage().isEmpty()) {
                 Glide.with(this)
                         .load(post.getPostImage())
@@ -157,88 +175,101 @@ public class SearchActivity extends AppCompatActivity {
                 imgRecipe.setImageResource(R.drawable.pasta);
             }
 
-            // CLICK DETAIL
             itemView.setOnClickListener(v -> {
-
                 Intent intent = new Intent(SearchActivity.this, PostDetailActivity.class);
-
-                intent.putExtra("username",
-                        post.getUser() != null ? post.getUser().getUsername() : "usuario");
-
+                intent.putExtra("username", post.getUser() != null ? post.getUser().getUsername() : "usuario");
                 intent.putExtra("postImage", post.getPostImage());
                 intent.putExtra("likes", post.getLikes());
                 intent.putExtra("title", post.getTitle());
                 intent.putExtra("postId", post.getId());
                 intent.putExtra("stepsText", post.getSteps());
 
-                // INGREDIENTS
                 if (post.getIngredients() != null) {
-
                     StringBuilder sb = new StringBuilder();
-
                     for (RecipeIngredientResponse ri : post.getIngredients()) {
                         if (ri != null && ri.getIngredient() != null) {
-                            sb.append("• ")
-                                    .append(ri.getIngredient().getName())
-                                    .append("\n");
+                            sb.append("• ").append(ri.getIngredient().getName()).append("\n");
                         }
                     }
-
                     intent.putExtra("ingredientsText", sb.toString());
                 }
-
                 startActivity(intent);
             });
 
-            // GRID LAYOUT
             GridLayout.LayoutParams params = new GridLayout.LayoutParams();
             params.width = 0;
             params.height = GridLayout.LayoutParams.WRAP_CONTENT;
             params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
             params.setMargins(16, 16, 16, 0);
-
             itemView.setLayoutParams(params);
 
             gridRecipes.addView(itemView);
         }
     }
 
-    // ================= FILTER =================
+    // ================= FILTER (TUS NOMBRES ORIGINALES) =================
     private void filtrarRecetas(String texto) {
-
         String q = texto.toLowerCase().trim();
-
         List<Post> filtrados = new ArrayList<>();
 
         for (Post post : allPosts) {
+            boolean coincideTexto = post.getTitle().toLowerCase().contains(q) ||
+                    (post.getUser() != null && post.getUser().getUsername().toLowerCase().contains(q));
 
-            boolean matchTitle = post.getTitle() != null &&
-                    post.getTitle().toLowerCase().contains(q);
-
-            boolean matchDesc = post.getDescription() != null &&
-                    post.getDescription().toLowerCase().contains(q);
-
-            boolean matchUser = post.getUser() != null &&
-                    post.getUser().getUsername().toLowerCase().contains(q);
-
-            boolean matchIngredients = false;
-
-            if (post.getIngredients() != null) {
-                for (RecipeIngredientResponse ing : post.getIngredients()) {
-                    if (ing != null &&
-                            ing.getIngredient() != null &&
-                            ing.getIngredient().getName().toLowerCase().contains(q)) {
-                        matchIngredients = true;
-                        break;
-                    }
-                }
+            boolean coincideCategoria = false;
+            if (selectedCategory.equals("Todas las categorías")) {
+                coincideCategoria = true;
+            } else if (post.getCategory() != null &&
+                    post.getCategory().getCategoryName().equalsIgnoreCase(selectedCategory)) {
+                coincideCategoria = true;
             }
 
-            if (matchTitle || matchDesc || matchUser || matchIngredients) {
+            if (coincideTexto && coincideCategoria) {
                 filtrados.add(post);
             }
         }
 
+        // Lógica de visibilidad del botón Limpiar
+        if (!q.isEmpty() || !selectedCategory.equals("Todas las categorías")) {
+            btnClearFilters.setVisibility(View.VISIBLE);
+        } else {
+            btnClearFilters.setVisibility(View.GONE);
+        }
+
+        // Mensaje de no resultados
+        if (filtrados.isEmpty()) {
+            tvNoResults.setVisibility(View.VISIBLE);
+            gridRecipes.setVisibility(View.GONE);
+        } else {
+            tvNoResults.setVisibility(View.GONE);
+            gridRecipes.setVisibility(View.VISIBLE);
+        }
+
         cargarPosts(filtrados);
+    }
+
+    private void configureSpinner() {
+        List<String> nombres = new ArrayList<>();
+        nombres.add("Todas las categorías");
+
+        for (Category cat : categoriesList) {
+            nombres.add(cat.getCategoryName());
+        }
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, nombres);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerCategories.setAdapter(adapter);
+
+        spinnerCategories.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectedCategory = nombres.get(position);
+                filtrarRecetas(etSearch.getText().toString());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
     }
 }

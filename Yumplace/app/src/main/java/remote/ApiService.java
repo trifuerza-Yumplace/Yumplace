@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import dto.request.UpdateUserRequest;
+import modelo.Category;
 import modelo.Comment;
 import modelo.Post;
 import dto.request.LoginRequest;
@@ -76,4 +77,7 @@ public interface ApiService {
 
     @DELETE("users/{id}/unfollow")
     Call<Void> unfollowUser(@Path("id") Integer id);
+
+    @GET("api/categories")
+    Call<List<Category>> getAllCategories();
 }
