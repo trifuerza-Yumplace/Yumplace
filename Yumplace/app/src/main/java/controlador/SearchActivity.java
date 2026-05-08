@@ -45,9 +45,7 @@ public class SearchActivity extends AppCompatActivity {
     private List<Post> allPosts = new ArrayList<>();
     private Spinner spinnerCategories;
     private List<Category> categoriesList = new ArrayList<>();
-    private String selectedCategory = "Todas las categorías"; // Unificado a español
-
-    // Nuevas variables
+    private String selectedCategory = "Todas las categorías";
     private TextView tvNoResults;
     private Button btnClearFilters;
 
@@ -64,7 +62,7 @@ public class SearchActivity extends AppCompatActivity {
             return;
         }
 
-        // ================= INITIALIZE VIEWS =================
+        // ================= Inicializar vistas =================
         btnBackSearch = findViewById(R.id.btnBackSearch);
         etSearch = findViewById(R.id.etSearch);
         gridRecipes = findViewById(R.id.gridRecipes);
@@ -78,7 +76,7 @@ public class SearchActivity extends AppCompatActivity {
 
         btnBackSearch.setOnClickListener(v -> finish());
 
-        // ================= CLEAN FILTERS LOGIC =================
+        // ================= Lógica para limpiar filtros =================
         btnClearFilters.setOnClickListener(v -> {
             etSearch.setText("");
             spinnerCategories.setSelection(0);
@@ -142,6 +140,10 @@ public class SearchActivity extends AppCompatActivity {
                 return true;
             } else if (id == R.id.nav_search) {
                 return true;
+            } else if (id == R.id.nav_add) {
+                startActivity(new Intent(this, PublicPostActivity.class));
+                return true;
+
             } else if (id == R.id.nav_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
                 finish();
@@ -151,7 +153,7 @@ public class SearchActivity extends AppCompatActivity {
         });
     }
 
-    // ================= LOAD GRID (TUS NOMBRES ORIGINALES) =================
+    // ================= Cargar grid =================
     private void cargarPosts(List<Post> posts) {
         LayoutInflater inflater = LayoutInflater.from(this);
         gridRecipes.removeAllViews();
@@ -207,25 +209,25 @@ public class SearchActivity extends AppCompatActivity {
         }
     }
 
-    // ================= FILTER (TUS NOMBRES ORIGINALES) =================
-    private void filtrarRecetas(String texto) {
-        String q = texto.toLowerCase().trim();
-        List<Post> filtrados = new ArrayList<>();
+    // ================= Filtrar =================
+    private void filtrarRecetas(String text) {
+        String q = text.toLowerCase().trim();
+        List<Post> filtered = new ArrayList<>();
 
         for (Post post : allPosts) {
-            boolean coincideTexto = post.getTitle().toLowerCase().contains(q) ||
+            boolean textCoincides = post.getTitle().toLowerCase().contains(q) ||
                     (post.getUser() != null && post.getUser().getUsername().toLowerCase().contains(q));
 
-            boolean coincideCategoria = false;
+            boolean categoryCoincides = false;
             if (selectedCategory.equals("Todas las categorías")) {
-                coincideCategoria = true;
+                categoryCoincides = true;
             } else if (post.getCategory() != null &&
                     post.getCategory().getCategoryName().equalsIgnoreCase(selectedCategory)) {
-                coincideCategoria = true;
+                categoryCoincides = true;
             }
 
-            if (coincideTexto && coincideCategoria) {
-                filtrados.add(post);
+            if (textCoincides && categoryCoincides) {
+                filtered.add(post);
             }
         }
 
@@ -237,7 +239,7 @@ public class SearchActivity extends AppCompatActivity {
         }
 
         // Mensaje de no resultados
-        if (filtrados.isEmpty()) {
+        if (filtered.isEmpty()) {
             tvNoResults.setVisibility(View.VISIBLE);
             gridRecipes.setVisibility(View.GONE);
         } else {
@@ -245,26 +247,26 @@ public class SearchActivity extends AppCompatActivity {
             gridRecipes.setVisibility(View.VISIBLE);
         }
 
-        cargarPosts(filtrados);
+        cargarPosts(filtered);
     }
 
     private void configureSpinner() {
-        List<String> nombres = new ArrayList<>();
-        nombres.add("Todas las categorías");
+        List<String> names = new ArrayList<>();
+        names.add("Todas las categorías");
 
         for (Category cat : categoriesList) {
-            nombres.add(cat.getCategoryName());
+            names.add(cat.getCategoryName());
         }
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, nombres);
+                android.R.layout.simple_spinner_item, names);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerCategories.setAdapter(adapter);
 
         spinnerCategories.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedCategory = nombres.get(position);
+                selectedCategory = names.get(position);
                 filtrarRecetas(etSearch.getText().toString());
             }
 
