@@ -43,6 +43,8 @@
             android:name="controlador.SearchActivity"
             android:exported="false" />
 
+        <activity android:name="controlador.ForgotPasswordActivity" />
+
         <!-- Perfil -->
         <activity
             android:name="controlador.ProfileActivity"

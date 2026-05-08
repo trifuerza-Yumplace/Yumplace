@@ -29,6 +29,7 @@
             android:textColor="#333333" />
     </RelativeLayout>
 
+    <!-- Imagen de perfil -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -61,12 +62,13 @@
             android:textStyle="bold" />
     </LinearLayout>
 
+    <!-- Nombre de usuario -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Nombre"
+        android:text="Nombre de usuario"
         android:layout_marginTop="20dp"
-        android:textColor="#666666"/>
+        android:textColor="#666666" />
 
     <EditText
         android:id="@+id/etEditName"
@@ -75,14 +77,15 @@
         android:background="@drawable/input_background"
         android:padding="12dp"
         android:layout_marginTop="8dp"
-        android:hint="Tu nombre" />
+        android:hint="Nombre de usuario" />
 
+    <!-- Biografía -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Biografía"
         android:layout_marginTop="16dp"
-        android:textColor="#666666"/>
+        android:textColor="#666666" />
 
     <EditText
         android:id="@+id/etEditBio"
@@ -93,6 +96,7 @@
         android:layout_marginTop="8dp"
         android:hint="Cuenta algo sobre ti..." />
 
+    <!-- Guardar cambios -->
     <Button
         android:id="@+id/btnSaveProfile"
         android:layout_width="match_parent"
@@ -101,5 +105,25 @@
         android:backgroundTint="#F97316"
         android:textColor="#FFFFFF"
         android:layout_marginTop="32dp" />
+
+    <!-- Cerrar sesión -->
+    <Button
+        android:id="@+id/btnLogout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Cerrar sesión"
+        android:backgroundTint="#6B7280"
+        android:textColor="#FFFFFF"
+        android:layout_marginTop="12dp" />
+
+    <!-- Eliminar cuenta -->
+    <Button
+        android:id="@+id/btnDeleteAccount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Eliminar cuenta"
+        android:backgroundTint="#DC2626"
+        android:textColor="#FFFFFF"
+        android:layout_marginTop="8dp" />
 
 </LinearLayout>

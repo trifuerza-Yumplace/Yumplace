@@ -6,6 +6,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.View;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -37,7 +38,9 @@ public class ProfileActivity extends AppCompatActivity {
     private BottomNavigationView bottomNavigation;
 
     private ApiService apiService;
-    private TextView tvProfileName, tvProfileBio;
+
+    private TextView tvProfileName, tvProfileBio, tvProfileHeaderUsername;
+    private TextView tvMyPostsCount, tvMyFollowersCount, tvMyFollowingCount, tvNoMyPosts;
     private ImageView imgProfileCircle;
 
     @Override
@@ -55,18 +58,28 @@ public class ProfileActivity extends AppCompatActivity {
 
         apiService = RetrofitClient.getApiService(this);
 
+        // ================= VIEWS =================
         rvMyRecipes = findViewById(R.id.rvMyRecipes);
         bottomNavigation = findViewById(R.id.bottomNavProfile);
+
         Button btnEditProfile = findViewById(R.id.btnEditProfile);
 
         tvProfileName = findViewById(R.id.tvProfileName);
         tvProfileBio = findViewById(R.id.tvProfileBio);
         imgProfileCircle = findViewById(R.id.imgProfileCircle);
+        tvProfileHeaderUsername = findViewById(R.id.tvProfileHeaderUsername);
 
-        rvMyRecipes.setLayoutManager(new GridLayoutManager(this, 3));
+        tvMyPostsCount = findViewById(R.id.tvMyPostsCount);
+        tvMyFollowersCount = findViewById(R.id.tvMyFollowersCount);
+        tvMyFollowingCount = findViewById(R.id.tvMyFollowingCount);
+        tvNoMyPosts = findViewById(R.id.tvNoMyPosts);
+
+        // ================= RECYCLER =================
+        rvMyRecipes.setLayoutManager(new GridLayoutManager(this, 2));
         adapter = new ProfileGridAdapter(this, postList);
         rvMyRecipes.setAdapter(adapter);
 
+        // ================= BOTTOM NAV =================
         bottomNavigation.setSelectedItemId(R.id.nav_profile);
 
         bottomNavigation.setOnItemSelectedListener(item -> {
@@ -90,15 +103,15 @@ public class ProfileActivity extends AppCompatActivity {
             } else return id == R.id.nav_profile;
         });
 
+        // Ir a editar perfil
         btnEditProfile.setOnClickListener(v ->
                 startActivity(new Intent(this, EditProfileActivity.class))
         );
 
-        // 🔥 SOLO CARGAMOS PERFIL
         cargarPerfil();
     }
 
-    // ================= PERFIL (/me) =================
+    // ================= PERFIL (/users/me) =================
     private void cargarPerfil() {
 
         apiService.getMyProfile().enqueue(new Callback<UserResponse>() {
@@ -110,6 +123,7 @@ public class ProfileActivity extends AppCompatActivity {
                     UserResponse user = response.body();
 
                     tvProfileName.setText(user.getUsername());
+                    tvProfileHeaderUsername.setText(user.getUsername());
 
                     tvProfileBio.setText(
                             user.getBiography() != null && !user.getBiography().isEmpty()
@@ -128,8 +142,11 @@ public class ProfileActivity extends AppCompatActivity {
                         imgProfileCircle.setImageResource(R.drawable.user);
                     }
 
-                    // 🔥 IMPORTANTE: cargar posts SOLO después del perfil
                     cargarMisPosts();
+
+                    // Cargamos seguidores y seguidos usando el id del usuario actual
+                    cargarSeguidores(user.getId());
+                    cargarSeguidos(user.getId());
 
                 } else {
                     Toast.makeText(ProfileActivity.this,
@@ -147,7 +164,7 @@ public class ProfileActivity extends AppCompatActivity {
         });
     }
 
-    // ================= POSTS (/posts/me) =================
+    // ================= MIS POSTS (/posts/me) =================
     private void cargarMisPosts() {
 
         apiService.getMyPosts().enqueue(new Callback<List<Post>>() {
@@ -155,23 +172,101 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
 
+                postList.clear();
+
                 if (response.isSuccessful() && response.body() != null) {
 
-                    postList.clear();
-                    postList.addAll(response.body());
-                    adapter.notifyDataSetChanged();
+                    List<Post> posts = response.body();
+
+                    if (!posts.isEmpty()) {
+                        postList.addAll(posts);
+                        tvNoMyPosts.setVisibility(View.GONE);
+                        rvMyRecipes.setVisibility(View.VISIBLE);
+                    } else {
+                        tvNoMyPosts.setVisibility(View.VISIBLE);
+                        rvMyRecipes.setVisibility(View.GONE);
+                    }
+
+                    tvMyPostsCount.setText(String.valueOf(posts.size()));
 
                 } else {
+
+                    tvNoMyPosts.setVisibility(View.VISIBLE);
+                    rvMyRecipes.setVisibility(View.GONE);
+                    tvMyPostsCount.setText("0");
+
                     Toast.makeText(ProfileActivity.this,
                             "Error posts: " + response.code(),
                             Toast.LENGTH_SHORT).show();
                 }
+
+                adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onFailure(Call<List<Post>> call, Throwable t) {
+
+                postList.clear();
+                adapter.notifyDataSetChanged();
+
+                tvNoMyPosts.setVisibility(View.VISIBLE);
+                rvMyRecipes.setVisibility(View.GONE);
+                tvMyPostsCount.setText("0");
+
                 Toast.makeText(ProfileActivity.this,
                         "Error conexión posts",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // ================= SEGUIDORES =================
+    private void cargarSeguidores(int userId) {
+
+        apiService.getFollowers(userId).enqueue(new Callback<List<UserResponse>>() {
+
+            @Override
+            public void onResponse(Call<List<UserResponse>> call, Response<List<UserResponse>> response) {
+
+                if (response.isSuccessful() && response.body() != null) {
+                    tvMyFollowersCount.setText(String.valueOf(response.body().size()));
+                } else {
+                    tvMyFollowersCount.setText("0");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<UserResponse>> call, Throwable t) {
+                tvMyFollowersCount.setText("0");
+
+                Toast.makeText(ProfileActivity.this,
+                        "Error seguidores",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    // ================= SEGUIDOS =================
+    private void cargarSeguidos(int userId) {
+
+        apiService.getFollowing(userId).enqueue(new Callback<List<UserResponse>>() {
+
+            @Override
+            public void onResponse(Call<List<UserResponse>> call, Response<List<UserResponse>> response) {
+
+                if (response.isSuccessful() && response.body() != null) {
+                    tvMyFollowingCount.setText(String.valueOf(response.body().size()));
+                } else {
+                    tvMyFollowingCount.setText("0");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<UserResponse>> call, Throwable t) {
+                tvMyFollowingCount.setText("0");
+
+                Toast.makeText(ProfileActivity.this,
+                        "Error seguidos",
                         Toast.LENGTH_SHORT).show();
             }
         });
