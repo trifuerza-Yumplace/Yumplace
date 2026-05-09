@@ -32,6 +32,7 @@ public class Post {
     @SerializedName("likesCount")
     private int likes;
 
+    @SerializedName("commentsCount")
     private int comments;
 
     // 🔥 estado real del usuario actual

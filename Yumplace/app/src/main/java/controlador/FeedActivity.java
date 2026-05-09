@@ -136,12 +136,14 @@ public class FeedActivity extends AppCompatActivity {
                     // ✅ AQUÍ ESTÁ EL FIX REAL
                     for (Post post : response.body()) {
 
-                        // seguridad básica
+                        Log.d("COMMENTS_DEBUG",
+                                "POST ID: " + post.getId()
+                                        + " | comments = " + post.getComments());
+
                         if (post.getLikes() < 0) {
                             post.setLikes(0);
                         }
 
-                        // si backend no manda usuario o estado de like
                         if (post.getUser() == null) {
                             post.setLikedByUser(false);
                         }
