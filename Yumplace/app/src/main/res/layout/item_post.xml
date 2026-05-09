@@ -26,20 +26,34 @@
             android:orientation="vertical"
             android:layout_marginStart="8dp">
 
+            <!-- Username -->
             <TextView
                 android:id="@+id/tvUsername"
-                android:textStyle="bold"
-                android:textSize="14sp"
-                android:text="chef_carlos"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_width="wrap_content"/>
+                android:text="chef_carlos"
+                android:textStyle="bold"
+                android:textSize="14sp" />
 
+            <!-- Título receta -->
+            <TextView
+                android:id="@+id/tvRecipeTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pasta Carbonara"
+                android:textStyle="bold"
+                android:textSize="13sp"
+                android:textColor="#444444" />
+
+            <!-- Fecha -->
             <TextView
                 android:id="@+id/tvTime"
-                android:textSize="12sp"
-                android:text="hace 2 horas"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_width="wrap_content"/>
+                android:text="12/05/2026"
+                android:textSize="12sp"
+                android:textColor="#777777" />
+
         </LinearLayout>
     </LinearLayout>
 

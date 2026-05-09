@@ -8,6 +8,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.Date;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -57,11 +60,44 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
         // ================= TEXTO =================
         holder.tvUsername.setText(
-                post.getUser() != null ? post.getUser().getUsername() : "Usuario"
+                post.getUser() != null
+                        ? post.getUser().getUsername()
+                        : "Usuario"
         );
-        holder.tvTime.setText(post.getTime());
+
+// título receta
+        holder.tvRecipeTitle.setText(
+                post.getTitle() != null
+                        ? post.getTitle()
+                        : ""
+        );
+
+// fecha formateada
+        String formattedDate = "";
+
+        try {
+
+            // Backend → 2026-05-09T20:14:31
+            SimpleDateFormat inputFormat =
+                    new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+
+            Date date = inputFormat.parse(post.getTime());
+
+            SimpleDateFormat outputFormat =
+                    new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+
+            formattedDate = outputFormat.format(date);
+
+        } catch (Exception e) {
+            formattedDate = "";
+        }
+
+        holder.tvTime.setText(formattedDate);
+
         holder.tvLikes.setText(post.getLikes() + " me gusta");
-        holder.tvComments.setText("Ver los " + post.getComments() + " comentarios");
+        holder.tvComments.setText(
+                "Ver los " + post.getComments() + " comentarios"
+        );
 
         // ================= IMAGEN =================
         String imageUrl = post.getPostImage();
@@ -203,7 +239,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     static class PostViewHolder extends RecyclerView.ViewHolder {
 
         ImageView imgPost, imgLike;
-        TextView tvUsername, tvTime, tvLikes, tvComments;
+        TextView tvUsername, tvRecipeTitle,
+                tvTime, tvLikes, tvComments;
 
         public PostViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -211,6 +248,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             imgPost = itemView.findViewById(R.id.imgPost);
             imgLike = itemView.findViewById(R.id.imgLike);
             tvUsername = itemView.findViewById(R.id.tvUsername);
+            tvRecipeTitle = itemView.findViewById(R.id.tvRecipeTitle);
             tvTime = itemView.findViewById(R.id.tvTime);
             tvLikes = itemView.findViewById(R.id.tvLikes);
             tvComments = itemView.findViewById(R.id.tvComments);
