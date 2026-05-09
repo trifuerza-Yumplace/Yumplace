@@ -87,10 +87,14 @@ public class ProfileActivity extends AppCompatActivity {
             int id = item.getItemId();
 
             if (id == R.id.nav_home) {
-                startActivity(new Intent(this, FeedActivity.class));
-                finish();
-                return true;
 
+                Intent intent = new Intent(this, FeedActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+
+                startActivity(intent);
+                finish();
+
+                return true;
             } else if (id == R.id.nav_search) {
                 startActivity(new Intent(this, SearchActivity.class));
                 finish();

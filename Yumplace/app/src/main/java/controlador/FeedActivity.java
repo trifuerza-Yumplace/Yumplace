@@ -119,23 +119,6 @@ public class FeedActivity extends AppCompatActivity {
         });
     }
 
-    // ================= 🔥 RANDOM SIEMPRE AL VOLVER =================
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        if (!allPosts.isEmpty()) {
-
-            java.util.Collections.shuffle(allPosts, new Random(System.currentTimeMillis()));
-
-            postList.clear();
-            shownPosts.clear();
-            currentIndex = 0;
-
-            cargarSiguientePagina();
-        }
-    }
-
     // ================= CARGA INICIAL =================
     private void cargarPosts() {
 
