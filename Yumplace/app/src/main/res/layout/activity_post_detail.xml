@@ -222,11 +222,12 @@
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
-            <TextView
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvCommentsPreview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="12dp"
-                android:text="ana_foodie  ¡Se ve delicioso!&#10;Definitivamente voy a probar esta receta 😍&#10;&#10;pedro_chef  Gran receta, gracias por compartir!" />
+                android:nestedScrollingEnabled="false" />
 
         </LinearLayout>
     </ScrollView>

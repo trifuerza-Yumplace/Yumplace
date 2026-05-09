@@ -67,6 +67,9 @@ public class PostDetailActivity extends AppCompatActivity {
         TextView tvSteps = findViewById(R.id.tvSteps);
         TextView btnExpandSteps = findViewById(R.id.btnExpandSteps);
 
+        RecyclerView rvCommentsPreview =
+                findViewById(R.id.rvCommentsPreview);
+
         ImageView imgComment = findViewById(R.id.imgCommentDetail);
         ImageView imgLike = findViewById(R.id.imgLikeDetail);
 
@@ -114,6 +117,41 @@ public class PostDetailActivity extends AppCompatActivity {
         imgLike.setImageResource(likedByUser ? R.drawable.likellen : R.drawable.likevac);
 
         ApiService api = RetrofitClient.getApiService(this);
+
+        // ================= COMENTARIOS PREVIEW =================
+        rvCommentsPreview.setLayoutManager(
+                new LinearLayoutManager(this)
+        );
+
+        List<Comment> commentsPreview = new ArrayList<>();
+
+        CommentAdapter commentsAdapter =
+                new CommentAdapter(commentsPreview);
+
+        rvCommentsPreview.setAdapter(commentsAdapter);
+
+        api.getComments(postId).enqueue(new Callback<List<Comment>>() {
+
+            @Override
+            public void onResponse(Call<List<Comment>> call,
+                                   Response<List<Comment>> response) {
+
+                if (response.isSuccessful()
+                        && response.body() != null) {
+
+                    commentsPreview.clear();
+                    commentsPreview.addAll(response.body());
+
+                    commentsAdapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Comment>> call,
+                                  Throwable t) {
+
+            }
+        });
 
         // ================= LIKE =================
         imgLike.setOnClickListener(v -> {
