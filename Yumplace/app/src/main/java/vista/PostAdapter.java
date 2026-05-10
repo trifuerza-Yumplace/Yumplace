@@ -113,6 +113,30 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                 .error(R.drawable.pasta)
                 .into(holder.imgPost);
 
+        // ================= FOTO PERFIL =================
+        String profilePhoto = null;
+
+        android.util.Log.d(
+                "PROFILE_PHOTO_DEBUG",
+                "Usuario: "
+                        + (post.getUser() != null
+                        ? post.getUser().getUsername()
+                        : "NULL")
+                        + " | URL FOTO = "
+                        + profilePhoto
+        );
+
+        if (post.getUser() != null) {
+            profilePhoto = post.getUser().getPhoto();
+        }
+
+        Glide.with(context)
+                .load(profilePhoto)
+                .placeholder(R.drawable.user)
+                .error(R.drawable.user)
+                .circleCrop()
+                .into(holder.imgProfile);
+
         // ================= PERFIL =================
         holder.tvUsername.setOnClickListener(v -> {
             Intent intent = new Intent(context, OtherProfileActivity.class);
@@ -191,6 +215,12 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
             intent.putExtra("username", post.getUsername());
             intent.putExtra("postImage", finalImageUrl);
+            intent.putExtra(
+                    "profilePhoto",
+                    post.getUser() != null
+                            ? post.getUser().getPhoto()
+                            : ""
+            );
             intent.putExtra("likes", post.getLikes());
             intent.putExtra("title", post.getTitle());
             intent.putExtra("postId", post.getId());
@@ -238,13 +268,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
     static class PostViewHolder extends RecyclerView.ViewHolder {
 
-        ImageView imgPost, imgLike;
+        ImageView imgProfile, imgPost, imgLike;
         TextView tvUsername, tvRecipeTitle,
                 tvTime, tvLikes, tvComments;
 
         public PostViewHolder(@NonNull View itemView) {
             super(itemView);
 
+            imgProfile = itemView.findViewById(R.id.imgProfile);
             imgPost = itemView.findViewById(R.id.imgPost);
             imgLike = itemView.findViewById(R.id.imgLike);
             tvUsername = itemView.findViewById(R.id.tvUsername);

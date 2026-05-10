@@ -83,6 +83,8 @@ public class PostDetailActivity extends AppCompatActivity {
         if (postImage == null || postImage.isEmpty()) {
             postImage = DEFAULT_IMAGE;
         }
+        String profilePhoto =
+                getIntent().getStringExtra("profilePhoto");
 
         int postId = getIntent().getIntExtra("postId", -1);
         int userId = getIntent().getIntExtra("userId", -1);
@@ -107,7 +109,12 @@ public class PostDetailActivity extends AppCompatActivity {
         tvTitle.setText(title);
         tvTime.setText(!time.isEmpty() ? time + " min" : "");
 
-        imgProfile.setImageResource(R.drawable.user);
+        Glide.with(this)
+                .load(profilePhoto)
+                .placeholder(R.drawable.user)
+                .error(R.drawable.user)
+                .circleCrop()
+                .into(imgProfile);
 
         Glide.with(this)
                 .load(postImage)

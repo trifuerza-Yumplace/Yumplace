@@ -136,6 +136,15 @@ public class FeedActivity extends AppCompatActivity {
                     // ✅ AQUÍ ESTÁ EL FIX REAL
                     for (Post post : response.body()) {
 
+                        Log.d("USER_JSON_DEBUG",
+                                "POST ID: " + post.getId()
+                                        + "\nUSER: " + (post.getUser() != null
+                                        ? post.getUser().getUsername()
+                                        : "NULL")
+                                        + "\nPHOTO: " + (post.getUser() != null
+                                        ? post.getUser().getPhoto()
+                                        : "NULL"));
+
                         Log.d("COMMENTS_DEBUG",
                                 "POST ID: " + post.getId()
                                         + " | comments = " + post.getComments());
