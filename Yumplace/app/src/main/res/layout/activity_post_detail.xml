@@ -164,8 +164,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="12dp"
-                android:lineSpacingExtra="6dp"
-                android:text="1. Hierve agua con sal y cocina los espaguetis.&#10;&#10;2. Corta la panceta y fríela hasta que quede crujiente.&#10;&#10;3. Bate los huevos con el queso y la pimienta.&#10;&#10;4. Escurre la pasta reservando un poco de agua.&#10;&#10;5. Mezcla la pasta con la panceta y añade la mezcla de huevo.&#10;&#10;6. Ajusta con agua de cocción si hace falta.&#10;&#10;7. Sirve con más queso y pimienta." />
+                android:lineSpacingExtra="10dp"
+                android:textSize="15sp"
+                android:textColor="#333333"
+                android:textStyle="normal" />
 
             <!-- boton despliegue -->
             <TextView
@@ -180,38 +182,12 @@
                 android:textStyle="bold"/>
 
             <LinearLayout
+                android:id="@+id/containerCategories"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginTop="8dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="#FDE2C5"
-                    android:padding="8dp"
-                    android:text="#pasta"
-                    android:textColor="#FF6F00" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:background="#FDE2C5"
-                    android:padding="8dp"
-                    android:text="#italiana"
-                    android:textColor="#FF6F00" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:background="#FDE2C5"
-                    android:padding="8dp"
-                    android:text="#carbonara"
-                    android:textColor="#FF6F00" />
-            </LinearLayout>
+                android:orientation="horizontal"/>
 
             <TextView
                 android:layout_width="wrap_content"

@@ -1,10 +1,19 @@
 package controlador;
 
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.StyleSpan;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -75,6 +84,7 @@ public class PostDetailActivity extends AppCompatActivity {
 
         TextView tvTitle = findViewById(R.id.tvTitleRecipe);
         TextView tvTime = findViewById(R.id.tvTimeRecipe);
+        LinearLayout containerCategories = findViewById(R.id.containerCategories);
 
         // ================= DATOS =================
         String username = getIntent().getStringExtra("username");
@@ -124,6 +134,32 @@ public class PostDetailActivity extends AppCompatActivity {
         imgLike.setImageResource(likedByUser ? R.drawable.likellen : R.drawable.likevac);
 
         ApiService api = RetrofitClient.getApiService(this);
+
+        // ================= CATEGORÍAS =================
+        containerCategories.removeAllViews();
+
+        String categoryName = getIntent().getStringExtra("category");
+
+        if (categoryName != null && !categoryName.isEmpty()) {
+
+            TextView tag = new TextView(this);
+            tag.setText("#" + categoryName.toLowerCase());
+            tag.setBackgroundColor(Color.parseColor("#FDE2C5"));
+            tag.setTextColor(Color.parseColor("#FF6F00"));
+            tag.setPadding(20, 10, 20, 10);
+
+            LinearLayout.LayoutParams params =
+                    new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                    );
+
+            params.setMarginEnd(16);
+
+            tag.setLayoutParams(params);
+
+            containerCategories.addView(tag);
+        }
 
         // ================= COMENTARIOS PREVIEW =================
         rvCommentsPreview.setLayoutManager(
@@ -266,27 +302,62 @@ public class PostDetailActivity extends AppCompatActivity {
             dialog.show();
         });
 
-        // ================= PASOS =================
+        // ================= PASOS (FORMATO PRO) =================
+
         String[] stepLines = stepsText.split("\n");
 
         StringBuilder shortStepsBuilder = new StringBuilder();
-        for (int i = 0; i < Math.min(4, stepLines.length); i++) {
-            shortStepsBuilder.append(stepLines[i]).append("\n");
+
+        SpannableStringBuilder fullStepsBuilder = new SpannableStringBuilder();
+        SpannableStringBuilder shortStepsFormatted = new SpannableStringBuilder();
+
+        for (int i = 0; i < stepLines.length; i++) {
+
+            String step = stepLines[i].trim();
+            if (step.isEmpty()) continue;
+
+            String number = (i + 1) + ". ";
+
+            // ===== número estilizado =====
+            SpannableString numSpan = new SpannableString(number);
+            numSpan.setSpan(new ForegroundColorSpan(Color.parseColor("#FF6F00")),
+                    0, number.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+            numSpan.setSpan(new RelativeSizeSpan(1.4f),
+                    0, number.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+            numSpan.setSpan(new StyleSpan(Typeface.BOLD),
+                    0, number.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+            // ===== línea completa =====
+            SpannableStringBuilder line = new SpannableStringBuilder();
+            line.append(numSpan);
+            line.append(step);
+            line.append("\n\n");
+
+            fullStepsBuilder.append(line);
+
+            // ===== versión corta =====
+            if (i < 4) {
+                shortStepsFormatted.append(line);
+            }
         }
 
-        String shortSteps = shortStepsBuilder.toString();
         final boolean[] stepsExpanded = {false};
 
-        tvSteps.setText(shortSteps.isEmpty() ? stepsText : shortSteps);
+// mostrar versión corta inicial
+        tvSteps.setText(shortStepsFormatted.length() == 0 ? fullStepsBuilder : shortStepsFormatted);
 
         btnExpandSteps.setOnClickListener(v -> {
+
             if (stepsExpanded[0]) {
-                tvSteps.setText(shortSteps);
+                tvSteps.setText(shortStepsFormatted.length() == 0 ? fullStepsBuilder : shortStepsFormatted);
                 btnExpandSteps.setText("Ver más");
             } else {
-                tvSteps.setText(finalStepsText);
+                tvSteps.setText(fullStepsBuilder);
                 btnExpandSteps.setText("Ver menos");
             }
+
             stepsExpanded[0] = !stepsExpanded[0];
         });
 

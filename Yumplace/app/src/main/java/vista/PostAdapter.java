@@ -233,6 +233,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
             intent.putExtra("stepsText", post.getSteps());
 
+            if (post.getCategory() != null) {
+                intent.putExtra("category", post.getCategory().getCategoryName());
+            }
+
             // ================= INGREDIENTES =================
             if (post.getIngredients() != null) {
 
