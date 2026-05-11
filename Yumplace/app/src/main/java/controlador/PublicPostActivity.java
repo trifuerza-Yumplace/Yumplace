@@ -13,8 +13,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+
+import modelo.Category;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -40,7 +46,10 @@ public class PublicPostActivity extends AppCompatActivity {
 
     private LinearLayout containerIngredients, containerSteps;
     private TextView btnAddIngredient, btnAddStep;
-    private EditText etTitle, etTime, etTags, etPhotoUrl;
+    private EditText etTitle, etTime, etPhotoUrl;
+    private Spinner spinnerCategories;
+    private List<Category> categoriesList = new ArrayList<>();
+    private Integer selectedCategoryId = null;
     private ImageView ivRecipePhoto;
     private Button btnPublish;
     private ApiService apiService;
@@ -75,6 +84,7 @@ public class PublicPostActivity extends AppCompatActivity {
         }
 
         apiService = RetrofitClient.getApiService(this);
+        loadCategories();
 
         // Inicializar Vistas
         containerIngredients = findViewById(R.id.containerIngredients);
@@ -83,7 +93,7 @@ public class PublicPostActivity extends AppCompatActivity {
         btnAddStep = findViewById(R.id.btnAddStep);
         etTitle = findViewById(R.id.etTitle);
         etTime = findViewById(R.id.etTime);
-        etTags = findViewById(R.id.etTags);
+        spinnerCategories = findViewById(R.id.spinnerCategories);
         etPhotoUrl = findViewById(R.id.etPhotoUrl);
         ivRecipePhoto = findViewById(R.id.ivRecipePhoto);
         btnPublish = findViewById(R.id.btnPublish);
@@ -121,6 +131,72 @@ public class PublicPostActivity extends AppCompatActivity {
         btnAddIngredient.setOnClickListener(v -> addIngredient());
         btnAddStep.setOnClickListener(v -> addStep());
         btnPublish.setOnClickListener(v -> publicarPost());
+    }
+
+    private void loadCategories() {
+
+        apiService.getAllCategories().enqueue(new Callback<List<Category>>() {
+
+            @Override
+            public void onResponse(Call<List<Category>> call,
+                                   Response<List<Category>> response) {
+
+                if (response.isSuccessful() && response.body() != null) {
+
+                    categoriesList = response.body();
+
+                    List<String> categoryNames = new ArrayList<>();
+                    categoryNames.add("Selecciona categoría");
+
+                    for (Category category : categoriesList) {
+                        categoryNames.add(category.getCategoryName());
+                    }
+
+                    ArrayAdapter<String> adapter =
+                            new ArrayAdapter<>(
+                                    PublicPostActivity.this,
+                                    android.R.layout.simple_spinner_item,
+                                    categoryNames
+                            );
+
+                    adapter.setDropDownViewResource(
+                            android.R.layout.simple_spinner_dropdown_item
+                    );
+
+                    spinnerCategories.setAdapter(adapter);
+
+                    spinnerCategories.setOnItemSelectedListener(
+                            new AdapterView.OnItemSelectedListener() {
+
+                                @Override
+                                public void onItemSelected(AdapterView<?> parent,
+                                                           View view,
+                                                           int position,
+                                                           long id) {
+
+                                    if (position == 0) {
+                                        selectedCategoryId = null;
+                                    } else {
+                                        selectedCategoryId =
+                                                categoriesList.get(position - 1).getIdCategory();
+                                    }
+                                }
+
+                                @Override
+                                public void onNothingSelected(AdapterView<?> parent) {}
+                            });
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Category>> call, Throwable t) {
+                Toast.makeText(
+                        PublicPostActivity.this,
+                        "Error cargando categorías",
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+        });
     }
 
     // ================= INGREDIENTES Y PASOS (Igual que antes) =================
@@ -163,13 +239,19 @@ public class PublicPostActivity extends AppCompatActivity {
     // ================= PUBLICAR CON VALIDACIONES ACTUALIZADAS =================
     private void publicarPost() {
         String titulo = etTitle.getText().toString().trim();
-        String descripcion = etTags.getText().toString().trim();
         String time = etTime.getText().toString().trim();
         String photoUrl = etPhotoUrl.getText().toString().trim();
 
         // 1. VALIDAR TÍTULO
         if (titulo.isEmpty()) {
             etTitle.setError("El título es obligatorio");
+            return;
+        }
+
+        if (selectedCategoryId == null) {
+            Toast.makeText(this,
+                    "Selecciona una categoría",
+                    Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -202,13 +284,13 @@ public class PublicPostActivity extends AppCompatActivity {
 
         Map<String, Object> body = new HashMap<>();
         body.put("title", titulo);
-        body.put("description", descripcion);
+        body.put("description", "");
+        body.put("categoryId", selectedCategoryId);
         body.put("photo", finalPhoto);
         body.put("prepTime", time.isEmpty() ? 0 : Integer.parseInt(time));
         body.put("difficulty", "easy");
         body.put("steps", String.join("\n", pasos));
         body.put("ingredients", ingredientes);
-        body.put("categoryId", 1); // No olvides el ID de categoría que definimos en Swagger
 
         apiService.createPost(body).enqueue(new Callback<Post>() {
             @Override
