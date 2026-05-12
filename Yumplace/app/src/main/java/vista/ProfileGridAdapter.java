@@ -59,10 +59,12 @@ public class ProfileGridAdapter extends RecyclerView.Adapter<ProfileGridAdapter.
                 .error(R.drawable.pasta)
                 .into(holder.image);
 
-        // ================= CLICK A DETALLE =================
         holder.itemView.setOnClickListener(v -> {
 
             Intent intent = new Intent(context, PostDetailActivity.class);
+
+            // IMPORTANTE: necesario para cargar ingredientes desde la API
+            intent.putExtra("postId", post.getId());
 
             intent.putExtra("username",
                     post.getUser() != null ? post.getUser().getUsername() : "Usuario");
@@ -70,6 +72,19 @@ public class ProfileGridAdapter extends RecyclerView.Adapter<ProfileGridAdapter.
             intent.putExtra("postImage", finalImageUrl);
             intent.putExtra("likes", post.getLikes());
             intent.putExtra("title", post.getTitle());
+
+            // NUEVO: para mantener el estado del like
+            intent.putExtra("likedByUser", post.isLiked());
+
+            // NUEVO: para que salga la foto de perfil en el detalle
+            if (post.getUser() != null) {
+                intent.putExtra("profilePhoto", post.getUser().getPhoto());
+            }
+
+            // NUEVO: para que salga la categoría en el detalle
+            if (post.getCategory() != null) {
+                intent.putExtra("category", post.getCategory().getCategoryName());
+            }
 
             intent.putExtra(
                     "time",
