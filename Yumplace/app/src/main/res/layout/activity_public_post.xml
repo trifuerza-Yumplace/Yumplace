@@ -140,8 +140,9 @@
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_weight="1"
-                android:hint="Ej: 45"
-                android:inputType="number"
+                android:inputType="numberDecimal"
+                android:digits="0123456789.,"
+                android:hint="Ej: 45 o 1,10"
                 android:padding="14dp"
                 android:background="@drawable/bg_input_box" />
 

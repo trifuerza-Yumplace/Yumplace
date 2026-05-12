@@ -272,24 +272,15 @@ public class PublicPostActivity extends AppCompatActivity {
             return;
         }
 
+        String selectedUnit = spinnerTimeUnit.getSelectedItem().toString();
+
         int prepTime;
 
         try {
-            prepTime = Integer.parseInt(time);
-        } catch (NumberFormatException e) {
-            etTime.setError("Introduce un número válido");
+            prepTime = parsePrepTime(time, selectedUnit);
+        } catch (IllegalArgumentException e) {
+            etTime.setError(e.getMessage());
             return;
-        }
-
-        if (prepTime <= 0) {
-            etTime.setError("El tiempo debe ser mayor que 0");
-            return;
-        }
-
-        String selectedUnit = spinnerTimeUnit.getSelectedItem().toString();
-
-        if (selectedUnit.equals("horas")) {
-            prepTime = prepTime * 60;
         }
 
         if (selectedCategoryId == null) {
@@ -349,5 +340,75 @@ public class PublicPostActivity extends AppCompatActivity {
                 Toast.makeText(PublicPostActivity.this, "Error conexión", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+    private int parsePrepTime(String timeText, String selectedUnit) {
+
+        if (timeText == null || timeText.trim().isEmpty()) {
+            throw new IllegalArgumentException("El tiempo es obligatorio");
+        }
+
+        String cleanTime = timeText.trim().replace(",", ".");
+
+        if (selectedUnit.equals("minutos")) {
+
+            if (cleanTime.contains(".")) {
+                throw new IllegalArgumentException("En minutos usa un número entero, ej: 70");
+            }
+
+            int minutes = Integer.parseInt(cleanTime);
+
+            if (minutes <= 0) {
+                throw new IllegalArgumentException("El tiempo debe ser mayor que 0");
+            }
+
+            return minutes;
+        }
+
+        // Si selecciona horas:
+        // 1      -> 60 minutos
+        // 1.10   -> 1 h 10 min = 70 minutos
+        // 1,30   -> 1 h 30 min = 90 minutos
+        if (selectedUnit.equals("horas")) {
+
+            if (cleanTime.contains(".")) {
+
+                String[] parts = cleanTime.split("\\.");
+
+                if (parts.length != 2) {
+                    throw new IllegalArgumentException("Formato válido: 1,30");
+                }
+
+                int hours = Integer.parseInt(parts[0]);
+                int minutes = Integer.parseInt(parts[1]);
+
+                if (hours < 0 || minutes < 0) {
+                    throw new IllegalArgumentException("El tiempo debe ser mayor que 0");
+                }
+
+                if (minutes >= 60) {
+                    throw new IllegalArgumentException("Los minutos deben ser menores de 60");
+                }
+
+                int totalMinutes = (hours * 60) + minutes;
+
+                if (totalMinutes <= 0) {
+                    throw new IllegalArgumentException("El tiempo debe ser mayor que 0");
+                }
+
+                return totalMinutes;
+
+            } else {
+
+                int hours = Integer.parseInt(cleanTime);
+
+                if (hours <= 0) {
+                    throw new IllegalArgumentException("El tiempo debe ser mayor que 0");
+                }
+
+                return hours * 60;
+            }
+        }
+
+        throw new IllegalArgumentException("Unidad de tiempo no válida");
     }
 }

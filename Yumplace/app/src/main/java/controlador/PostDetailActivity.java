@@ -120,7 +120,16 @@ public class PostDetailActivity extends AppCompatActivity {
         tvUsername.setText(username != null ? username : "");
         tvLikes.setText(likes + " me gusta");
         tvTitle.setText(title);
-        tvTime.setText(!time.isEmpty() ? time + " min" : "");
+        if (!time.isEmpty()) {
+            try {
+                int prepMinutes = Integer.parseInt(time);
+                tvTime.setText(formatPrepTime(prepMinutes));
+            } catch (NumberFormatException e) {
+                tvTime.setText(time + " min");
+            }
+        } else {
+            tvTime.setText("");
+        }
 
         Glide.with(this)
                 .load(profilePhoto)
@@ -451,6 +460,23 @@ public class PostDetailActivity extends AppCompatActivity {
         }
 
         return steps;
+    }
+
+    // tiempo horas o minutos
+    private String formatPrepTime(int totalMinutes) {
+
+        if (totalMinutes < 60) {
+            return totalMinutes + " min";
+        }
+
+        int hours = totalMinutes / 60;
+        int minutes = totalMinutes % 60;
+
+        if (minutes == 0) {
+            return hours + " h";
+        }
+
+        return hours + " h " + minutes + " min";
     }
     private SpannableStringBuilder buildStepsSpannable(List<String> steps, int maxSteps) {
 
