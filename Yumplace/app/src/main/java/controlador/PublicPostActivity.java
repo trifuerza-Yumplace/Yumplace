@@ -47,7 +47,7 @@ public class PublicPostActivity extends AppCompatActivity {
     private LinearLayout containerIngredients, containerSteps;
     private TextView btnAddIngredient, btnAddStep;
     private EditText etTitle, etTime, etPhotoUrl;
-    private Spinner spinnerCategories;
+    private Spinner spinnerCategories, spinnerTimeUnit;
     private List<Category> categoriesList = new ArrayList<>();
     private Integer selectedCategoryId = null;
     private ImageView ivRecipePhoto;
@@ -84,7 +84,6 @@ public class PublicPostActivity extends AppCompatActivity {
         }
 
         apiService = RetrofitClient.getApiService(this);
-        loadCategories();
 
         // Inicializar Vistas
         containerIngredients = findViewById(R.id.containerIngredients);
@@ -94,9 +93,13 @@ public class PublicPostActivity extends AppCompatActivity {
         etTitle = findViewById(R.id.etTitle);
         etTime = findViewById(R.id.etTime);
         spinnerCategories = findViewById(R.id.spinnerCategories);
+        spinnerTimeUnit = findViewById(R.id.spinnerTimeUnit);
         etPhotoUrl = findViewById(R.id.etPhotoUrl);
         ivRecipePhoto = findViewById(R.id.ivRecipePhoto);
         btnPublish = findViewById(R.id.btnPublish);
+
+        setupTimeUnitSpinner();
+        loadCategories();
 
         // ================= SELECCIONAR DESDE GALERÍA =================
         // Al tocar la imagen o el layout de la foto, abrimos galería
@@ -131,6 +134,21 @@ public class PublicPostActivity extends AppCompatActivity {
         btnAddIngredient.setOnClickListener(v -> addIngredient());
         btnAddStep.setOnClickListener(v -> addStep());
         btnPublish.setOnClickListener(v -> publicarPost());
+    }
+
+    private void setupTimeUnitSpinner() {
+
+        String[] timeUnits = {"minutos", "horas"};
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                timeUnits
+        );
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        spinnerTimeUnit.setAdapter(adapter);
     }
 
     private void loadCategories() {
@@ -248,6 +266,32 @@ public class PublicPostActivity extends AppCompatActivity {
             return;
         }
 
+        // 2. VALIDAR TIEMPO
+        if (time.isEmpty()) {
+            etTime.setError("El tiempo es obligatorio");
+            return;
+        }
+
+        int prepTime;
+
+        try {
+            prepTime = Integer.parseInt(time);
+        } catch (NumberFormatException e) {
+            etTime.setError("Introduce un número válido");
+            return;
+        }
+
+        if (prepTime <= 0) {
+            etTime.setError("El tiempo debe ser mayor que 0");
+            return;
+        }
+
+        String selectedUnit = spinnerTimeUnit.getSelectedItem().toString();
+
+        if (selectedUnit.equals("horas")) {
+            prepTime = prepTime * 60;
+        }
+
         if (selectedCategoryId == null) {
             Toast.makeText(this,
                     "Selecciona una categoría",
@@ -287,7 +331,7 @@ public class PublicPostActivity extends AppCompatActivity {
         body.put("description", "");
         body.put("categoryId", selectedCategoryId);
         body.put("photo", finalPhoto);
-        body.put("prepTime", time.isEmpty() ? 0 : Integer.parseInt(time));
+        body.put("prepTime", prepTime);
         body.put("difficulty", "easy");
         body.put("steps", String.join("\n", pasos));
         body.put("ingredients", ingredientes);

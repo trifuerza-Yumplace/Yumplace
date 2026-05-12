@@ -130,15 +130,30 @@
             android:textSize="14sp"
             android:textStyle="bold" />
 
-        <EditText
-            android:id="@+id/etTime"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Ej: 45 minutos"
-            android:inputType="number"
-            android:padding="14dp"
-            android:background="@drawable/bg_input_box" />
+            android:orientation="horizontal">
 
+            <EditText
+                android:id="@+id/etTime"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:hint="Ej: 45"
+                android:inputType="number"
+                android:padding="14dp"
+                android:background="@drawable/bg_input_box" />
+
+            <Spinner
+                android:id="@+id/spinnerTimeUnit"
+                android:layout_width="130dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_input_box"
+                android:spinnerMode="dropdown" />
+
+        </LinearLayout>
         <!-- INGREDIENTES -->
         <LinearLayout
             android:layout_width="match_parent"
