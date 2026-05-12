@@ -164,10 +164,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="12dp"
-                android:lineSpacingExtra="10dp"
+                android:lineSpacingExtra="2dp"
                 android:textSize="15sp"
                 android:textColor="#333333"
-                android:textStyle="normal" />
+                android:textStyle="normal"
+                android:includeFontPadding="false" />
 
             <!-- boton despliegue -->
             <TextView
