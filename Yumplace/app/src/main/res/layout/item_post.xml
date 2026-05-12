@@ -35,16 +35,6 @@
                 android:textStyle="bold"
                 android:textSize="14sp" />
 
-            <!-- Título receta -->
-            <TextView
-                android:id="@+id/tvRecipeTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Pasta Carbonara"
-                android:textStyle="bold"
-                android:textSize="13sp"
-                android:textColor="#444444" />
-
             <!-- Fecha -->
             <TextView
                 android:id="@+id/tvTime"
@@ -75,31 +65,66 @@
 
         <ImageView
             android:id="@+id/imgLike"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
             android:src="@drawable/likevac"/>
 
         <ImageView
             android:id="@+id/imgComment"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_marginStart="16dp"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:layout_marginStart="14dp"
             android:src="@drawable/chat"/>
     </LinearLayout>
 
-    <!-- TEXTO -->
+    <!-- LIKES -->
     <TextView
         android:id="@+id/tvLikes"
-        android:layout_marginTop="4dp"
-        android:text="342 me gusta"
-        android:textStyle="bold"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content"/>
+        android:layout_marginTop="4dp"
+        android:text="0 me gusta"
+        android:textStyle="bold"
+        android:textSize="13sp"
+        android:textColor="#111111" />
 
+    <!-- CAPTION: usuario + título receta -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="4dp">
+
+        <!-- CAPTION USERNAME -->
+        <TextView
+            android:id="@+id/tvCaptionUsername"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="tete"
+            android:textStyle="bold"
+            android:textSize="13sp"
+            android:textColor="#111111" />
+
+        <!-- TÍTULO RECETA -->
+        <TextView
+            android:id="@+id/tvRecipeTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:text="mochis"
+            android:textSize="13sp"
+            android:textColor="#111111" />
+
+    </LinearLayout>
+
+    <!-- COMENTARIOS -->
     <TextView
         android:id="@+id/tvComments"
-        android:text="Ver los 28 comentarios"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content"/>
+        android:layout_marginTop="3dp"
+        android:text="Ver los 0 comentarios"
+        android:textSize="12sp"
+        android:textColor="#555555" />
 
 </LinearLayout>
