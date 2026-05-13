@@ -1,14 +1,15 @@
 package controlador;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.app.AlertDialog;
-import android.text.InputType;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -31,8 +32,8 @@ public class EditProfileActivity extends AppCompatActivity {
 
     private ImageView imgEditProfile;
     private EditText etName, etBio;
-    private Button btnSave, btnLogout, btnDeleteAccount;
-    private TextView tvChangePhoto;
+    private Button btnSave, btnLogout;
+    private TextView tvChangePhoto, btnDeleteAccount;
 
     private String currentPhotoUrl = null;
 
@@ -43,6 +44,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
         tokenManager = new TokenManager(this);
 
+        // Seguridad: Si no hay token, al login
         if (tokenManager.getToken() == null || tokenManager.getToken().isEmpty()) {
             startActivity(new Intent(this, LoginActivity.class));
             finish();
@@ -51,34 +53,30 @@ public class EditProfileActivity extends AppCompatActivity {
 
         apiService = RetrofitClient.getApiService(this);
 
-        // Asociamos las variables Java con los elementos del XML
-        ImageView btnBack = findViewById(R.id.btnBackEdit);
+        // ================= CABECERA (REGRESO) =================
+        ImageView ivBack = findViewById(R.id.ivBackEdit);
+        TextView tvCancel = findViewById(R.id.tvCancelEdit);
+        LinearLayout layoutBack = findViewById(R.id.layoutBackEdit);
+
+        ivBack.setOnClickListener(v -> finish());
+        tvCancel.setOnClickListener(v -> finish());
+        layoutBack.setOnClickListener(v -> finish());
+
+        // ================= INICIALIZAR VISTAS =================
         imgEditProfile = findViewById(R.id.imgEditProfile);
         tvChangePhoto = findViewById(R.id.tvChangePhoto);
-
+        etName = findViewById(R.id.etEditName);
+        etBio = findViewById(R.id.etEditBio);
         btnSave = findViewById(R.id.btnSaveProfile);
         btnLogout = findViewById(R.id.btnLogout);
         btnDeleteAccount = findViewById(R.id.btnDeleteAccount);
 
-        etName = findViewById(R.id.etEditName);
-        etBio = findViewById(R.id.etEditBio);
-
-        // Volver a la pantalla anterior
-        btnBack.setOnClickListener(v -> finish());
-
-        // Cargamos los datos actuales del usuario
+        // ================= LÓGICA =================
         loadCurrentProfile();
 
-        // Guardar cambios del perfil
         btnSave.setOnClickListener(v -> updateProfile());
-
-        // cambiamos foto
         tvChangePhoto.setOnClickListener(v -> showChangePhotoDialog());
-
-        // Cerrar sesión
         btnLogout.setOnClickListener(v -> logout());
-
-        // Eliminar cuenta
         btnDeleteAccount.setOnClickListener(v -> showDeleteAccountDialog());
     }
 
@@ -87,22 +85,12 @@ public class EditProfileActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-
                     UserResponse user = response.body();
 
-                    // Cargamos nombre de usuario y biografía actuales
                     etName.setText(user.getUsername());
-
-                    if (user.getBiography() != null && !user.getBiography().isEmpty()) {
-                        etBio.setText(user.getBiography());
-                    } else {
-                        etBio.setText("");
-                    }
-
-                    // Guardamos la foto actual para no perderla al actualizar el perfil
+                    etBio.setText(user.getBiography() != null ? user.getBiography() : "");
                     currentPhotoUrl = user.getProfilePhoto();
 
-                    // Mostramos la foto actual igual que en la pantalla de perfil
                     if (currentPhotoUrl != null && !currentPhotoUrl.isEmpty()) {
                         Glide.with(EditProfileActivity.this)
                                 .load(currentPhotoUrl)
@@ -111,23 +99,12 @@ public class EditProfileActivity extends AppCompatActivity {
                     } else {
                         imgEditProfile.setImageResource(R.drawable.user);
                     }
-
-                } else {
-                    Toast.makeText(
-                            EditProfileActivity.this,
-                            "Error al cargar perfil: " + response.code(),
-                            Toast.LENGTH_SHORT
-                    ).show();
                 }
             }
 
             @Override
             public void onFailure(Call<UserResponse> call, Throwable t) {
-                Toast.makeText(
-                        EditProfileActivity.this,
-                        "Error de conexión al cargar perfil",
-                        Toast.LENGTH_SHORT
-                ).show();
+                Toast.makeText(EditProfileActivity.this, "Error al cargar datos", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -136,119 +113,73 @@ public class EditProfileActivity extends AppCompatActivity {
         String newName = etName.getText().toString().trim();
         String newBio = etBio.getText().toString().trim();
 
-        etName.setError(null);
-
         if (newName.isEmpty()) {
-            etName.setError("El nombre de usuario no puede estar vacío");
-            etName.requestFocus();
+            etName.setError("El nombre es obligatorio");
             return;
         }
 
-        // Mantenemos currentPhotoUrl para no borrar la foto existente al guardar
-        UpdateUserRequest request = new UpdateUserRequest(
-                newName,
-                currentPhotoUrl, // foto actual o nueva foto seleccionada
-                null,            // teléfono
-                newBio
-        );
+        UpdateUserRequest request = new UpdateUserRequest(newName, currentPhotoUrl, null, newBio);
 
         apiService.updateUser(request).enqueue(new Callback<UserResponse>() {
             @Override
             public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
                 if (response.isSuccessful()) {
-                    Toast.makeText(
-                            EditProfileActivity.this,
-                            "Cambios guardados correctamente",
-                            Toast.LENGTH_SHORT
-                    ).show();
-
+                    Toast.makeText(EditProfileActivity.this, "Perfil actualizado", Toast.LENGTH_SHORT).show();
                     finish();
-
                 } else {
-                    Toast.makeText(
-                            EditProfileActivity.this,
-                            "Error al actualizar: " + response.code(),
-                            Toast.LENGTH_SHORT
-                    ).show();
+                    Toast.makeText(EditProfileActivity.this, "Error al guardar", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<UserResponse> call, Throwable t) {
-                Toast.makeText(
-                        EditProfileActivity.this,
-                        "Error de conexión",
-                        Toast.LENGTH_SHORT
-                ).show();
+                Toast.makeText(EditProfileActivity.this, "Fallo de red", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    // cambiar foto
     private void showChangePhotoDialog() {
         EditText inputUrl = new EditText(this);
-        inputUrl.setHint("Pega la URL de la imagen");
+        inputUrl.setHint("https://ejemplo.com/foto.jpg");
         inputUrl.setInputType(InputType.TYPE_TEXT_VARIATION_URI);
-        inputUrl.setPadding(40, 20, 40, 20);
+        inputUrl.setPadding(50, 30, 50, 30);
 
-        if (currentPhotoUrl != null && !currentPhotoUrl.isEmpty()) {
-            inputUrl.setText(currentPhotoUrl);
-        }
+        if (currentPhotoUrl != null) inputUrl.setText(currentPhotoUrl);
 
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle("Cambiar foto de perfil")
-                .setMessage("Introduce una URL de imagen para usarla como foto de perfil.")
+        new AlertDialog.Builder(this)
+                .setTitle("URL de la foto de perfil")
                 .setView(inputUrl)
                 .setNegativeButton("Cancelar", null)
-                .setPositiveButton("Aceptar", null)
-                .create();
-
-        dialog.setOnShowListener(d -> {
-            Button btnAccept = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-
-            btnAccept.setOnClickListener(v -> {
-                String photoUrl = inputUrl.getText().toString().trim();
-
-                if (photoUrl.isEmpty()) {
-                    inputUrl.setError("Introduce una URL");
-                    return;
-                }
-
-                if (!photoUrl.startsWith("http://") && !photoUrl.startsWith("https://")) {
-                    inputUrl.setError("La URL debe empezar por http:// o https://");
-                    return;
-                }
-
-                // Guardamos temporalmente la nueva URL
-                currentPhotoUrl = photoUrl;
-
-                // Mostramos la imagen en la pantalla antes de guardar
-                Glide.with(EditProfileActivity.this)
-                        .load(currentPhotoUrl)
-                        .circleCrop()
-                        .error(R.drawable.user)
-                        .into(imgEditProfile);
-
-                Toast.makeText(
-                        EditProfileActivity.this,
-                        "Imagen seleccionada. Pulsa Guardar Cambios para aplicarla",
-                        Toast.LENGTH_LONG
-                ).show();
-
-                dialog.dismiss();
-            });
-        });
-
-        dialog.show();
+                .setPositiveButton("Cargar", (dialog, which) -> {
+                    String url = inputUrl.getText().toString().trim();
+                    if (url.startsWith("http")) {
+                        currentPhotoUrl = url;
+                        Glide.with(EditProfileActivity.this)
+                                .load(currentPhotoUrl)
+                                .circleCrop()
+                                .error(R.drawable.user)
+                                .into(imgEditProfile);
+                    } else {
+                        Toast.makeText(this, "URL no válida", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .show();
     }
 
-    //eliminar cuenta
+    private void logout() {
+        tokenManager.clearToken();
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
     private void showDeleteAccountDialog() {
         new AlertDialog.Builder(this)
                 .setTitle("Eliminar cuenta")
-                .setMessage("¿Seguro que quieres eliminar tu cuenta? Esta acción no se puede deshacer.")
-                .setNegativeButton("No, cancelar", null)
-                .setPositiveButton("Sí, eliminar", (dialog, which) -> deleteAccount())
+                .setMessage("¿Estás seguro? Esta acción borrará todas tus recetas.")
+                .setNegativeButton("Cancelar", null)
+                .setPositiveButton("Eliminar definitivamente", (dialog, which) -> deleteAccount())
                 .show();
     }
 
@@ -257,46 +188,14 @@ public class EditProfileActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
-
-                    tokenManager.clearToken();
-
-                    Toast.makeText(
-                            EditProfileActivity.this,
-                            "Cuenta eliminada correctamente",
-                            Toast.LENGTH_LONG
-                    ).show();
-
-                    Intent intent = new Intent(EditProfileActivity.this, LoginActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();
-
-                } else {
-                    Toast.makeText(
-                            EditProfileActivity.this,
-                            "No se pudo eliminar la cuenta. Código: " + response.code(),
-                            Toast.LENGTH_LONG
-                    ).show();
+                    logout();
                 }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                Toast.makeText(
-                        EditProfileActivity.this,
-                        "Error de conexión al eliminar la cuenta",
-                        Toast.LENGTH_LONG
-                ).show();
+                Toast.makeText(EditProfileActivity.this, "Error al conectar", Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private void logout() {
-        tokenManager.clearToken();
-
-        Intent intent = new Intent(EditProfileActivity.this, LoginActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
     }
 }

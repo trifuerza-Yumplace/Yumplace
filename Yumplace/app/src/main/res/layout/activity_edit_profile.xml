@@ -1,129 +1,168 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#F8F3F8"
-    android:padding="20dp">
+    android:fillViewport="true"
+    android:background="#F8F3F8">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp">
-
-        <ImageView
-            android:id="@+id/btnBackEdit"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@android:drawable/ic_menu_revert"
-            app:tint="#F97316" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="Editar Perfil"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="#333333" />
-    </RelativeLayout>
-
-    <!-- Imagen de perfil -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="center_horizontal">
+        android:padding="20dp">
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            app:cardCornerRadius="60dp"
-            app:strokeColor="#F97316"
-            app:strokeWidth="2dp"
-            app:cardElevation="0dp">
+        <!-- CABECERA (Igual que PublicPostActivity) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="24dp">
 
-            <ImageView
-                android:id="@+id/imgEditProfile"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@drawable/user"
-                android:scaleType="centerCrop" />
-        </com.google.android.material.card.MaterialCardView>
+            <LinearLayout
+                android:id="@+id/layoutBackEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:clickable="true"
+                android:focusable="true">
 
+                <ImageView
+                    android:id="@+id/ivBackEdit"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@android:drawable/ic_media_previous"
+                    />
+
+                <TextView
+                    android:id="@+id/tvCancelEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cancelar"
+                    android:textColor="#000000"
+                    android:textSize="14sp"
+                    android:layout_marginStart="4dp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Editar Perfil"
+                android:gravity="center"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="#333333"
+                android:layout_marginEnd="65dp" />
+        </LinearLayout>
+
+        <!-- SECCIÓN FOTO DE PERFIL -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                app:cardCornerRadius="60dp"
+                app:strokeColor="#F97316"
+                app:strokeWidth="2dp"
+                app:cardElevation="4dp">
+
+                <ImageView
+                    android:id="@+id/imgEditProfile"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/user"
+                    android:scaleType="centerCrop" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:id="@+id/tvChangePhoto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cambiar foto de perfil"
+                android:textColor="#F97316"
+                android:layout_marginTop="12dp"
+                android:textStyle="bold"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <!-- FORMULARIO -->
         <TextView
-            android:id="@+id/tvChangePhoto"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Cambiar foto de perfil"
-            android:textColor="#F97316"
-            android:layout_marginTop="8dp"
+            android:text="Nombre de usuario"
+            android:layout_marginTop="24dp"
+            android:textColor="#666666"
             android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/etEditName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/input_background"
+            android:padding="14dp"
+            android:layout_marginTop="8dp"
+            android:hint="Ej: juan_perez"
+            android:inputType="textPersonName" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Biografía"
+            android:layout_marginTop="16dp"
+            android:textColor="#666666"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/etEditBio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/input_background"
+            android:padding="14dp"
+            android:layout_marginTop="8dp"
+            android:hint="Cuenta algo sobre ti..."
+            android:inputType="textMultiLine"
+            android:minLines="3"
+            android:gravity="top" />
+
+        <!-- BOTONES DE ACCIÓN -->
+        <Button
+            android:id="@+id/btnSaveProfile"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:text="Guardar Cambios"
+            android:backgroundTint="#F97316"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="32dp"
+            app:cornerRadius="12dp" />
+
+        <Button
+            android:id="@+id/btnLogout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Cerrar sesión"
+            android:backgroundTint="#6B7280"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="16dp"
+            app:cornerRadius="12dp"
+            style="@style/Widget.MaterialComponents.Button.TextButton.Dialog.Flush" />
+
+        <TextView
+            android:id="@+id/btnDeleteAccount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Eliminar mi cuenta"
+            android:textColor="#DC2626"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="24dp"
+            android:padding="8dp"
+            android:textStyle="bold" />
+
     </LinearLayout>
-
-    <!-- Nombre de usuario -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Nombre de usuario"
-        android:layout_marginTop="20dp"
-        android:textColor="#666666" />
-
-    <EditText
-        android:id="@+id/etEditName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/input_background"
-        android:padding="12dp"
-        android:layout_marginTop="8dp"
-        android:hint="Nombre de usuario" />
-
-    <!-- Biografía -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Biografía"
-        android:layout_marginTop="16dp"
-        android:textColor="#666666" />
-
-    <EditText
-        android:id="@+id/etEditBio"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/input_background"
-        android:padding="12dp"
-        android:layout_marginTop="8dp"
-        android:hint="Cuenta algo sobre ti..." />
-
-    <!-- Guardar cambios -->
-    <Button
-        android:id="@+id/btnSaveProfile"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Guardar Cambios"
-        android:backgroundTint="#F97316"
-        android:textColor="#FFFFFF"
-        android:layout_marginTop="32dp" />
-
-    <!-- Cerrar sesión -->
-    <Button
-        android:id="@+id/btnLogout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Cerrar sesión"
-        android:backgroundTint="#6B7280"
-        android:textColor="#FFFFFF"
-        android:layout_marginTop="12dp" />
-
-    <!-- Eliminar cuenta -->
-    <Button
-        android:id="@+id/btnDeleteAccount"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Eliminar cuenta"
-        android:backgroundTint="#DC2626"
-        android:textColor="#FFFFFF"
-        android:layout_marginTop="8dp" />
-
-</LinearLayout>
+</ScrollView>
