@@ -67,6 +67,12 @@ public class PublicPostActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_public_post);
 
+        ImageView ivBack = findViewById(R.id.ivBack);
+        TextView tvCancel = findViewById(R.id.tvCancel);
+
+        ivBack.setOnClickListener(v -> finish());
+        tvCancel.setOnClickListener(v -> finish());
+
         TokenManager tokenManager = new TokenManager(this);
         if (tokenManager.getToken() == null || tokenManager.getToken().isEmpty()) {
             startActivity(new Intent(this, LoginActivity.class));
@@ -121,6 +127,7 @@ public class PublicPostActivity extends AppCompatActivity {
         btnAddIngredient.setOnClickListener(v -> addIngredient());
         btnAddStep.setOnClickListener(v -> addStep());
         btnPublish.setOnClickListener(v -> publicarPost());
+
     }
 
     // ================= INGREDIENTES Y PASOS (Igual que antes) =================
