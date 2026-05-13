@@ -59,11 +59,12 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         Post post = postList.get(position);
 
         // ================= TEXTO =================
-        holder.tvUsername.setText(
-                post.getUser() != null
-                        ? post.getUser().getUsername()
-                        : "Usuario"
-        );
+        String username = post.getUser() != null && post.getUser().getUsername() != null
+                ? post.getUser().getUsername()
+                : "Usuario";
+
+        holder.tvUsername.setText(username);
+        holder.tvCaptionUsername.setText(username);
 
 // título receta
         holder.tvRecipeTitle.setText(
@@ -273,7 +274,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
     static class PostViewHolder extends RecyclerView.ViewHolder {
 
         ImageView imgProfile, imgPost, imgLike;
-        TextView tvUsername, tvRecipeTitle,
+        TextView tvUsername, tvCaptionUsername, tvRecipeTitle,
                 tvTime, tvLikes, tvComments;
 
         public PostViewHolder(@NonNull View itemView) {
@@ -287,6 +288,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             tvTime = itemView.findViewById(R.id.tvTime);
             tvLikes = itemView.findViewById(R.id.tvLikes);
             tvComments = itemView.findViewById(R.id.tvComments);
+            tvCaptionUsername = itemView.findViewById(R.id.tvCaptionUsername);
         }
     }
 }

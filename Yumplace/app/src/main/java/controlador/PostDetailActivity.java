@@ -105,6 +105,9 @@ public class PostDetailActivity extends AppCompatActivity {
         String stepsText = getIntent().getStringExtra("stepsText");
         if (stepsText == null) stepsText = "";
 
+        String ingredientsExtra = getIntent().getStringExtra("ingredientsText");
+        final String ingredientsFromIntent = ingredientsExtra != null ? ingredientsExtra : "";
+
         final String finalStepsText = stepsText;
 
         String title = getIntent().getStringExtra("title");
@@ -117,7 +120,16 @@ public class PostDetailActivity extends AppCompatActivity {
         tvUsername.setText(username != null ? username : "");
         tvLikes.setText(likes + " me gusta");
         tvTitle.setText(title);
-        tvTime.setText(!time.isEmpty() ? time + " min" : "");
+        if (!time.isEmpty()) {
+            try {
+                int prepMinutes = Integer.parseInt(time);
+                tvTime.setText(formatPrepTime(prepMinutes));
+            } catch (NumberFormatException e) {
+                tvTime.setText(time + " min");
+            }
+        } else {
+            tvTime.setText("");
+        }
 
         Glide.with(this)
                 .load(profilePhoto)
@@ -304,62 +316,47 @@ public class PostDetailActivity extends AppCompatActivity {
 
         // ================= PASOS (FORMATO PRO) =================
 
-        String[] stepLines = stepsText.split("\n");
+        List<String> stepsList = splitSteps(stepsText);
 
-        StringBuilder shortStepsBuilder = new StringBuilder();
+        final int STEP_LIMIT = 4;
 
-        SpannableStringBuilder fullStepsBuilder = new SpannableStringBuilder();
-        SpannableStringBuilder shortStepsFormatted = new SpannableStringBuilder();
+        SpannableStringBuilder fullStepsBuilder =
+                buildStepsSpannable(stepsList, stepsList.size());
 
-        for (int i = 0; i < stepLines.length; i++) {
-
-            String step = stepLines[i].trim();
-            if (step.isEmpty()) continue;
-
-            String number = (i + 1) + ". ";
-
-            // ===== número estilizado =====
-            SpannableString numSpan = new SpannableString(number);
-            numSpan.setSpan(new ForegroundColorSpan(Color.parseColor("#FF6F00")),
-                    0, number.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-            numSpan.setSpan(new RelativeSizeSpan(1.4f),
-                    0, number.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-            numSpan.setSpan(new StyleSpan(Typeface.BOLD),
-                    0, number.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-            // ===== línea completa =====
-            SpannableStringBuilder line = new SpannableStringBuilder();
-            line.append(numSpan);
-            line.append(step);
-            line.append("\n\n");
-
-            fullStepsBuilder.append(line);
-
-            // ===== versión corta =====
-            if (i < 4) {
-                shortStepsFormatted.append(line);
-            }
-        }
+        SpannableStringBuilder shortStepsBuilder =
+                buildStepsSpannable(stepsList, Math.min(STEP_LIMIT, stepsList.size()));
 
         final boolean[] stepsExpanded = {false};
 
-// mostrar versión corta inicial
-        tvSteps.setText(shortStepsFormatted.length() == 0 ? fullStepsBuilder : shortStepsFormatted);
+        if (stepsList.isEmpty()) {
 
-        btnExpandSteps.setOnClickListener(v -> {
+            tvSteps.setText("Sin pasos de preparación");
+            btnExpandSteps.setVisibility(View.GONE);
 
-            if (stepsExpanded[0]) {
-                tvSteps.setText(shortStepsFormatted.length() == 0 ? fullStepsBuilder : shortStepsFormatted);
-                btnExpandSteps.setText("Ver más");
-            } else {
-                tvSteps.setText(fullStepsBuilder);
-                btnExpandSteps.setText("Ver menos");
-            }
+        } else if (stepsList.size() <= STEP_LIMIT) {
 
-            stepsExpanded[0] = !stepsExpanded[0];
-        });
+            tvSteps.setText(fullStepsBuilder);
+            btnExpandSteps.setVisibility(View.GONE);
+
+        } else {
+
+            tvSteps.setText(shortStepsBuilder);
+            btnExpandSteps.setVisibility(View.VISIBLE);
+            btnExpandSteps.setText("Ver más");
+
+            btnExpandSteps.setOnClickListener(v -> {
+
+                if (stepsExpanded[0]) {
+                    tvSteps.setText(shortStepsBuilder);
+                    btnExpandSteps.setText("Ver más");
+                } else {
+                    tvSteps.setText(fullStepsBuilder);
+                    btnExpandSteps.setText("Ver menos");
+                }
+
+                stepsExpanded[0] = !stepsExpanded[0];
+            });
+        }
 
         // ================= INGREDIENTES =================
         if (postId != -1) {
@@ -369,38 +366,248 @@ public class PostDetailActivity extends AppCompatActivity {
                 public void onResponse(Call<List<RecipeIngredientResponse>> call,
                                        Response<List<RecipeIngredientResponse>> response) {
 
-                    if (!response.isSuccessful() || response.body() == null) {
-                        tvIngredients.setText("Sin ingredientes");
-                        return;
-                    }
+                    List<String> ingredientLines = new ArrayList<>();
 
-                    StringBuilder sb = new StringBuilder();
+                    if (response.isSuccessful() && response.body() != null) {
 
-                    for (RecipeIngredientResponse ri : response.body()) {
-                        if (ri != null && ri.getIngredient() != null) {
+                        for (RecipeIngredientResponse ri : response.body()) {
+                            if (ri != null && ri.getIngredient() != null) {
 
-                            sb.append("• ")
-                                    .append(ri.getIngredient().getName());
+                                StringBuilder line = new StringBuilder();
 
-                            if (ri.getQuantity() != null && !ri.getQuantity().isEmpty()) {
-                                sb.append(" - ").append(ri.getQuantity());
+                                line.append("• ")
+                                        .append(ri.getIngredient().getName());
+
+                                if (ri.getQuantity() != null && !ri.getQuantity().isEmpty()) {
+                                    line.append(" - ").append(ri.getQuantity());
+                                }
+
+                                ingredientLines.add(line.toString());
                             }
-
-                            sb.append("\n");
                         }
                     }
 
-                    tvIngredients.setText(sb.toString());
+                    // Si la API no devuelve ingredientes, usamos los que ya venían desde el PostAdapter
+                    if (ingredientLines.isEmpty()) {
+                        ingredientLines.addAll(splitIngredients(ingredientsFromIntent));
+                    }
+
+                    showExpandableIngredients(
+                            tvIngredients,
+                            btnExpandIngredients,
+                            ingredientLines
+                    );
                 }
 
                 @Override
                 public void onFailure(Call<List<RecipeIngredientResponse>> call, Throwable t) {
-                    tvIngredients.setText("Error cargando ingredientes");
+
+                    List<String> ingredientLines = splitIngredients(ingredientsFromIntent);
+
+                    showExpandableIngredients(
+                            tvIngredients,
+                            btnExpandIngredients,
+                            ingredientLines
+                    );
                 }
             });
 
         } else {
-            tvIngredients.setText("Sin ingredientes");
+
+            List<String> ingredientLines = splitIngredients(ingredientsFromIntent);
+
+            showExpandableIngredients(
+                    tvIngredients,
+                    btnExpandIngredients,
+                    ingredientLines
+            );
         }
+    }
+    private List<String> splitSteps(String stepsText) {
+
+        List<String> steps = new ArrayList<>();
+
+        if (stepsText == null || stepsText.trim().isEmpty()) {
+            return steps;
+        }
+
+        String normalized = stepsText
+                .replace("\r", "")
+                .trim();
+
+        // Si vienen pasos en una sola línea tipo:
+        // 1. Lavar... 2. Cocer... 3. Servir...
+        // los separamos en líneas distintas
+        normalized = normalized.replaceAll("\\s+(?=\\d+\\s*[\\.)]\\s+)", "\n");
+
+        String[] parts = normalized.split("\\n+");
+
+        for (String part : parts) {
+
+            String step = part.trim();
+
+            // Quitamos números que ya vengan del backend o del usuario:
+            // 1. texto
+            // 2) texto
+            step = step.replaceFirst("^\\d+\\s*[\\.)]\\s*", "");
+
+            // Quitamos posibles viñetas
+            step = step.replaceFirst("^[-•]\\s*", "");
+
+            if (!step.isEmpty()) {
+                steps.add(step);
+            }
+        }
+
+        return steps;
+    }
+
+    // tiempo horas o minutos
+    private String formatPrepTime(int totalMinutes) {
+
+        if (totalMinutes < 60) {
+            return totalMinutes + " min";
+        }
+
+        int hours = totalMinutes / 60;
+        int minutes = totalMinutes % 60;
+
+        if (minutes == 0) {
+            return hours + " h";
+        }
+
+        return hours + " h " + minutes + " min";
+    }
+    private SpannableStringBuilder buildStepsSpannable(List<String> steps, int maxSteps) {
+
+        SpannableStringBuilder builder = new SpannableStringBuilder();
+
+        int limit = Math.min(maxSteps, steps.size());
+
+        for (int i = 0; i < limit; i++) {
+
+            String number = (i + 1) + ". ";
+
+            SpannableString numSpan = new SpannableString(number);
+
+            numSpan.setSpan(
+                    new ForegroundColorSpan(Color.parseColor("#FF6F00")),
+                    0,
+                    number.length(),
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            );
+
+            numSpan.setSpan(
+                    new RelativeSizeSpan(1.3f),
+                    0,
+                    number.length(),
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            );
+
+            numSpan.setSpan(
+                    new StyleSpan(Typeface.BOLD),
+                    0,
+                    number.length(),
+                    Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            );
+
+            builder.append(numSpan);
+            builder.append(steps.get(i));
+
+            // Solo un salto de línea para que no quede tan separado
+            if (i < limit - 1) {
+                builder.append("\n");
+            }
+        }
+
+        return builder;
+    }
+    private List<String> splitIngredients(String ingredientsText) {
+
+        List<String> ingredients = new ArrayList<>();
+
+        if (ingredientsText == null || ingredientsText.trim().isEmpty()) {
+            return ingredients;
+        }
+
+        String normalized = ingredientsText
+                .replace("\r", "")
+                .trim();
+
+        String[] lines = normalized.split("\\n+");
+
+        for (String line : lines) {
+
+            String ingredient = line.trim();
+
+            if (ingredient.isEmpty()) continue;
+
+            ingredient = ingredient.replaceFirst("^[-•]\\s*", "");
+
+            ingredients.add("• " + ingredient);
+        }
+
+        return ingredients;
+    }
+    private void showExpandableIngredients(TextView tvIngredients,
+                                           TextView btnExpandIngredients,
+                                           List<String> ingredients) {
+
+        final int INGREDIENT_LIMIT = 4;
+
+        if (ingredients == null || ingredients.isEmpty()) {
+            tvIngredients.setText("Sin ingredientes");
+            btnExpandIngredients.setVisibility(View.GONE);
+            return;
+        }
+
+        String fullText = buildIngredientsText(ingredients, ingredients.size());
+        String shortText = buildIngredientsText(
+                ingredients,
+                Math.min(INGREDIENT_LIMIT, ingredients.size())
+        );
+
+        final boolean[] ingredientsExpanded = {false};
+
+        if (ingredients.size() <= INGREDIENT_LIMIT) {
+
+            tvIngredients.setText(fullText);
+            btnExpandIngredients.setVisibility(View.GONE);
+
+        } else {
+
+            tvIngredients.setText(shortText);
+            btnExpandIngredients.setVisibility(View.VISIBLE);
+            btnExpandIngredients.setText("Ver más");
+
+            btnExpandIngredients.setOnClickListener(v -> {
+
+                if (ingredientsExpanded[0]) {
+                    tvIngredients.setText(shortText);
+                    btnExpandIngredients.setText("Ver más");
+                } else {
+                    tvIngredients.setText(fullText);
+                    btnExpandIngredients.setText("Ver menos");
+                }
+
+                ingredientsExpanded[0] = !ingredientsExpanded[0];
+            });
+        }
+    }
+    private String buildIngredientsText(List<String> ingredients, int maxItems) {
+
+        StringBuilder sb = new StringBuilder();
+
+        int limit = Math.min(maxItems, ingredients.size());
+
+        for (int i = 0; i < limit; i++) {
+            sb.append(ingredients.get(i));
+
+            if (i < limit - 1) {
+                sb.append("\n");
+            }
+        }
+
+        return sb.toString();
     }
 }

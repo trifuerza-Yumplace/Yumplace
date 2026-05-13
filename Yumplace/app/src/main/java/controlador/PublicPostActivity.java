@@ -13,8 +13,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+
+import modelo.Category;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -40,7 +46,10 @@ public class PublicPostActivity extends AppCompatActivity {
 
     private LinearLayout containerIngredients, containerSteps;
     private TextView btnAddIngredient, btnAddStep;
-    private EditText etTitle, etTime, etTags, etPhotoUrl;
+    private EditText etTitle, etTime, etPhotoUrl;
+    private Spinner spinnerCategories, spinnerTimeUnit;
+    private List<Category> categoriesList = new ArrayList<>();
+    private Integer selectedCategoryId = null;
     private ImageView ivRecipePhoto;
     private Button btnPublish;
     private ApiService apiService;
@@ -89,10 +98,14 @@ public class PublicPostActivity extends AppCompatActivity {
         btnAddStep = findViewById(R.id.btnAddStep);
         etTitle = findViewById(R.id.etTitle);
         etTime = findViewById(R.id.etTime);
-        etTags = findViewById(R.id.etTags);
+        spinnerCategories = findViewById(R.id.spinnerCategories);
+        spinnerTimeUnit = findViewById(R.id.spinnerTimeUnit);
         etPhotoUrl = findViewById(R.id.etPhotoUrl);
         ivRecipePhoto = findViewById(R.id.ivRecipePhoto);
         btnPublish = findViewById(R.id.btnPublish);
+
+        setupTimeUnitSpinner();
+        loadCategories();
 
         // ================= SELECCIONAR DESDE GALERÍA =================
         // Al tocar la imagen o el layout de la foto, abrimos galería
@@ -128,6 +141,87 @@ public class PublicPostActivity extends AppCompatActivity {
         btnAddStep.setOnClickListener(v -> addStep());
         btnPublish.setOnClickListener(v -> publicarPost());
 
+    }
+
+    private void setupTimeUnitSpinner() {
+
+        String[] timeUnits = {"minutos", "horas"};
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_item,
+                timeUnits
+        );
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        spinnerTimeUnit.setAdapter(adapter);
+    }
+
+    private void loadCategories() {
+
+        apiService.getAllCategories().enqueue(new Callback<List<Category>>() {
+
+            @Override
+            public void onResponse(Call<List<Category>> call,
+                                   Response<List<Category>> response) {
+
+                if (response.isSuccessful() && response.body() != null) {
+
+                    categoriesList = response.body();
+
+                    List<String> categoryNames = new ArrayList<>();
+                    categoryNames.add("Selecciona categoría");
+
+                    for (Category category : categoriesList) {
+                        categoryNames.add(category.getCategoryName());
+                    }
+
+                    ArrayAdapter<String> adapter =
+                            new ArrayAdapter<>(
+                                    PublicPostActivity.this,
+                                    android.R.layout.simple_spinner_item,
+                                    categoryNames
+                            );
+
+                    adapter.setDropDownViewResource(
+                            android.R.layout.simple_spinner_dropdown_item
+                    );
+
+                    spinnerCategories.setAdapter(adapter);
+
+                    spinnerCategories.setOnItemSelectedListener(
+                            new AdapterView.OnItemSelectedListener() {
+
+                                @Override
+                                public void onItemSelected(AdapterView<?> parent,
+                                                           View view,
+                                                           int position,
+                                                           long id) {
+
+                                    if (position == 0) {
+                                        selectedCategoryId = null;
+                                    } else {
+                                        selectedCategoryId =
+                                                categoriesList.get(position - 1).getIdCategory();
+                                    }
+                                }
+
+                                @Override
+                                public void onNothingSelected(AdapterView<?> parent) {}
+                            });
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Category>> call, Throwable t) {
+                Toast.makeText(
+                        PublicPostActivity.this,
+                        "Error cargando categorías",
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
+        });
     }
 
     // ================= INGREDIENTES Y PASOS (Igual que antes) =================
@@ -170,13 +264,36 @@ public class PublicPostActivity extends AppCompatActivity {
     // ================= PUBLICAR CON VALIDACIONES ACTUALIZADAS =================
     private void publicarPost() {
         String titulo = etTitle.getText().toString().trim();
-        String descripcion = etTags.getText().toString().trim();
         String time = etTime.getText().toString().trim();
         String photoUrl = etPhotoUrl.getText().toString().trim();
 
         // 1. VALIDAR TÍTULO
         if (titulo.isEmpty()) {
             etTitle.setError("El título es obligatorio");
+            return;
+        }
+
+        // 2. VALIDAR TIEMPO
+        if (time.isEmpty()) {
+            etTime.setError("El tiempo es obligatorio");
+            return;
+        }
+
+        String selectedUnit = spinnerTimeUnit.getSelectedItem().toString();
+
+        int prepTime;
+
+        try {
+            prepTime = parsePrepTime(time, selectedUnit);
+        } catch (IllegalArgumentException e) {
+            etTime.setError(e.getMessage());
+            return;
+        }
+
+        if (selectedCategoryId == null) {
+            Toast.makeText(this,
+                    "Selecciona una categoría",
+                    Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -209,13 +326,13 @@ public class PublicPostActivity extends AppCompatActivity {
 
         Map<String, Object> body = new HashMap<>();
         body.put("title", titulo);
-        body.put("description", descripcion);
+        body.put("description", "");
+        body.put("categoryId", selectedCategoryId);
         body.put("photo", finalPhoto);
-        body.put("prepTime", time.isEmpty() ? 0 : Integer.parseInt(time));
+        body.put("prepTime", prepTime);
         body.put("difficulty", "easy");
         body.put("steps", String.join("\n", pasos));
         body.put("ingredients", ingredientes);
-        body.put("categoryId", 1); // No olvides el ID de categoría que definimos en Swagger
 
         apiService.createPost(body).enqueue(new Callback<Post>() {
             @Override
@@ -230,5 +347,75 @@ public class PublicPostActivity extends AppCompatActivity {
                 Toast.makeText(PublicPostActivity.this, "Error conexión", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+    private int parsePrepTime(String timeText, String selectedUnit) {
+
+        if (timeText == null || timeText.trim().isEmpty()) {
+            throw new IllegalArgumentException("El tiempo es obligatorio");
+        }
+
+        String cleanTime = timeText.trim().replace(",", ".");
+
+        if (selectedUnit.equals("minutos")) {
+
+            if (cleanTime.contains(".")) {
+                throw new IllegalArgumentException("En minutos usa un número entero, ej: 70");
+            }
+
+            int minutes = Integer.parseInt(cleanTime);
+
+            if (minutes <= 0) {
+                throw new IllegalArgumentException("El tiempo debe ser mayor que 0");
+            }
+
+            return minutes;
+        }
+
+        // Si selecciona horas:
+        // 1      -> 60 minutos
+        // 1.10   -> 1 h 10 min = 70 minutos
+        // 1,30   -> 1 h 30 min = 90 minutos
+        if (selectedUnit.equals("horas")) {
+
+            if (cleanTime.contains(".")) {
+
+                String[] parts = cleanTime.split("\\.");
+
+                if (parts.length != 2) {
+                    throw new IllegalArgumentException("Formato válido: 1,30");
+                }
+
+                int hours = Integer.parseInt(parts[0]);
+                int minutes = Integer.parseInt(parts[1]);
+
+                if (hours < 0 || minutes < 0) {
+                    throw new IllegalArgumentException("El tiempo debe ser mayor que 0");
+                }
+
+                if (minutes >= 60) {
+                    throw new IllegalArgumentException("Los minutos deben ser menores de 60");
+                }
+
+                int totalMinutes = (hours * 60) + minutes;
+
+                if (totalMinutes <= 0) {
+                    throw new IllegalArgumentException("El tiempo debe ser mayor que 0");
+                }
+
+                return totalMinutes;
+
+            } else {
+
+                int hours = Integer.parseInt(cleanTime);
+
+                if (hours <= 0) {
+                    throw new IllegalArgumentException("El tiempo debe ser mayor que 0");
+                }
+
+                return hours * 60;
+            }
+        }
+
+        throw new IllegalArgumentException("Unidad de tiempo no válida");
     }
 }
