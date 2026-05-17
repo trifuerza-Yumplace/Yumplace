@@ -183,23 +183,103 @@ public class SearchActivity extends AppCompatActivity {
             }
 
             itemView.setOnClickListener(v -> {
-                Intent intent = new Intent(SearchActivity.this, PostDetailActivity.class);
-                intent.putExtra("username", post.getUser() != null ? post.getUser().getUsername() : "usuario");
+
+                Intent intent =
+                        new Intent(SearchActivity.this,
+                                PostDetailActivity.class);
+
+                // ===== USER =====
+                if (post.getUser() != null) {
+
+                    intent.putExtra(
+                            "username",
+                            post.getUser().getUsername()
+                    );
+
+                    intent.putExtra(
+                            "profilePhoto",
+                            post.getUser().getPhoto()
+                    );
+
+                    intent.putExtra(
+                            "userId",
+                            post.getUser().getId()
+                    );
+
+                } else {
+
+                    intent.putExtra("username", "usuario");
+                }
+
+                // ===== POST =====
+                intent.putExtra("postId", post.getId());
                 intent.putExtra("postImage", post.getPostImage());
                 intent.putExtra("likes", post.getLikes());
-                intent.putExtra("title", post.getTitle());
-                intent.putExtra("postId", post.getId());
-                intent.putExtra("stepsText", post.getSteps());
+                intent.putExtra("likedByUser", post.isLiked());
 
+                intent.putExtra(
+                        "title",
+                        post.getTitle() != null
+                                ? post.getTitle()
+                                : ""
+                );
+
+                intent.putExtra(
+                        "stepsText",
+                        post.getSteps() != null
+                                ? post.getSteps()
+                                : ""
+                );
+
+                // ===== TIEMPO =====
+                intent.putExtra(
+                        "time",
+                        String.valueOf(post.getPrepTime())
+                );
+
+                // ===== CATEGORÍA =====
+                if (post.getCategory() != null) {
+
+                    intent.putExtra(
+                            "category",
+                            post.getCategory().getCategoryName()
+                    );
+                }
+
+                // ===== INGREDIENTES =====
                 if (post.getIngredients() != null) {
+
                     StringBuilder sb = new StringBuilder();
-                    for (RecipeIngredientResponse ri : post.getIngredients()) {
-                        if (ri != null && ri.getIngredient() != null) {
-                            sb.append("• ").append(ri.getIngredient().getName()).append("\n");
+
+                    for (RecipeIngredientResponse ri
+                            : post.getIngredients()) {
+
+                        if (ri != null
+                                && ri.getIngredient() != null) {
+
+                            sb.append("• ")
+                                    .append(
+                                            ri.getIngredient()
+                                                    .getName()
+                                    );
+
+                            if (ri.getQuantity() != null
+                                    && !ri.getQuantity().isEmpty()) {
+
+                                sb.append(" - ")
+                                        .append(ri.getQuantity());
+                            }
+
+                            sb.append("\n");
                         }
                     }
-                    intent.putExtra("ingredientsText", sb.toString());
+
+                    intent.putExtra(
+                            "ingredientsText",
+                            sb.toString()
+                    );
                 }
+
                 startActivity(intent);
             });
 
