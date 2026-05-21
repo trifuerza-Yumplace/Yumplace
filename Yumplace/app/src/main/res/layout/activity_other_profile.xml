@@ -18,9 +18,11 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/circle_orange"/>
+            android:id="@+id/btnBackSearch"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="4dp"
+            android:src="@android:drawable/ic_media_previous" />
 
         <TextView
             android:id="@+id/tvOtherUsername"
@@ -163,14 +165,6 @@
                 android:text="Seguir"
                 android:backgroundTint="#FF6F00"
                 android:textColor="#FFFFFF"/>
-
-            <Button
-                android:id="@+id/btnMessage"
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_weight="1"
-                android:text="Mensaje"
-                android:layout_marginStart="8dp"/>
         </LinearLayout>
 
     </LinearLayout>
