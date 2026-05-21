@@ -43,6 +43,8 @@ public class PostDetailActivity extends AppCompatActivity {
 
     private int likes;
     private boolean likedByUser;
+    private List<Comment> commentsPreview = new ArrayList<>();
+    private CommentAdapter commentsAdapter;
 
     private final String DEFAULT_IMAGE =
             "https://media.istockphoto.com/id/165598110/es/vector/solar-de-construcción.jpg?s=612x612&w=0&k=20&c=CHRUil8J-yeXtkUvetIPKBdXS_mi4fBq7yLPQzpTwfU=";
@@ -178,9 +180,7 @@ public class PostDetailActivity extends AppCompatActivity {
                 new LinearLayoutManager(this)
         );
 
-        List<Comment> commentsPreview = new ArrayList<>();
-
-        CommentAdapter commentsAdapter =
+        commentsAdapter =
                 new CommentAdapter(commentsPreview);
 
         rvCommentsPreview.setAdapter(commentsAdapter);
@@ -303,6 +303,10 @@ public class PostDetailActivity extends AppCompatActivity {
                             adapter.notifyItemInserted(commentList.size() - 1);
 
                             etComment.setText("");
+
+                            // actualizar preview del detail
+                            commentsPreview.add(response.body());
+                            commentsAdapter.notifyItemInserted(commentsPreview.size() - 1);
                         }
                     }
 
