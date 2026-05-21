@@ -44,6 +44,7 @@ public class OtherProfileActivity extends AppCompatActivity {
 
     private Button btnFollow;
     private boolean isFollowing = false;
+    private int currentUserId = -1;
     private int userId;
     private ImageView imgOtherProfile;
 
@@ -126,6 +127,7 @@ public class OtherProfileActivity extends AppCompatActivity {
         cargarSeguidores(userId);
         cargarSeguidos(userId);
         configurarBotonFollow();
+        cargarEstadoFollow(userId);
     }
 
     // ================= PERFIL =================
@@ -225,17 +227,191 @@ public class OtherProfileActivity extends AppCompatActivity {
     // ================= CONFIGURACIÓN FOLLOW =================
     private void configurarBotonFollow() {
         btnFollow.setOnClickListener(v -> {
-            int seguidoresActuales = Integer.parseInt(tvOtherFollowersCount.getText().toString());
-            if (!isFollowing) {
-                isFollowing = true;
-                btnFollow.setText("Siguiendo");
-                tvOtherFollowersCount.setText(String.valueOf(seguidoresActuales + 1));
+            if (isFollowing) {
+                dejarDeSeguirUsuario(userId);
             } else {
-                isFollowing = false;
-                btnFollow.setText("Seguir");
-                tvOtherFollowersCount.setText(String.valueOf(seguidoresActuales - 1));
+                seguirUsuario(userId);
             }
         });
+    }
+
+    // ================= CARGAR ESTADO FOLLOW =================
+    private void cargarEstadoFollow(int otherUserId) {
+
+        btnFollow.setEnabled(false);
+        btnFollow.setText("Cargando...");
+
+        apiService.getMyProfile().enqueue(new Callback<UserResponse>() {
+            @Override
+            public void onResponse(Call<UserResponse> call, Response<UserResponse> response) {
+
+                if (response.isSuccessful() && response.body() != null) {
+
+                    currentUserId = response.body().getId();
+
+                    // Si estoy viendo mi propio perfil, ocultamos el botón seguir
+                    if (currentUserId == otherUserId) {
+                        btnFollow.setVisibility(View.GONE);
+                        return;
+                    }
+
+                    comprobarSiSigoAlUsuario(currentUserId, otherUserId);
+
+                } else {
+                    btnFollow.setEnabled(true);
+                    btnFollow.setText("Seguir");
+                    Toast.makeText(OtherProfileActivity.this,
+                            "No se pudo cargar tu usuario",
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UserResponse> call, Throwable t) {
+                btnFollow.setEnabled(true);
+                btnFollow.setText("Seguir");
+                Toast.makeText(OtherProfileActivity.this,
+                        "Error de conexión al cargar usuario",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    // ================= COMPROBAR SI YA SIGO =================
+    private void comprobarSiSigoAlUsuario(int myUserId, int otherUserId) {
+
+        apiService.getFollowing(myUserId).enqueue(new Callback<List<UserResponse>>() {
+            @Override
+            public void onResponse(Call<List<UserResponse>> call, Response<List<UserResponse>> response) {
+
+                isFollowing = false;
+
+                if (response.isSuccessful() && response.body() != null) {
+
+                    for (UserResponse user : response.body()) {
+                        if (user.getId() == otherUserId) {
+                            isFollowing = true;
+                            break;
+                        }
+                    }
+                }
+
+                actualizarBotonFollow();
+            }
+
+            @Override
+            public void onFailure(Call<List<UserResponse>> call, Throwable t) {
+                isFollowing = false;
+                actualizarBotonFollow();
+                Toast.makeText(OtherProfileActivity.this,
+                        "No se pudo comprobar si sigues al usuario",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    // ================= SEGUIR USUARIO =================
+    private void seguirUsuario(int otherUserId) {
+
+        btnFollow.setEnabled(false);
+
+        apiService.followUser(otherUserId).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+
+                if (response.isSuccessful()) {
+                    isFollowing = true;
+                    actualizarContadorSeguidores(1);
+                    actualizarBotonFollow();
+
+                    Toast.makeText(OtherProfileActivity.this,
+                            "Ahora sigues a este usuario",
+                            Toast.LENGTH_SHORT).show();
+
+                } else {
+                    btnFollow.setEnabled(true);
+                    Toast.makeText(OtherProfileActivity.this,
+                            "No se pudo seguir. Código: " + response.code(),
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                btnFollow.setEnabled(true);
+                Toast.makeText(OtherProfileActivity.this,
+                        "Error de conexión al seguir",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    // ================= DEJAR DE SEGUIR USUARIO =================
+    private void dejarDeSeguirUsuario(int otherUserId) {
+
+        btnFollow.setEnabled(false);
+
+        apiService.unfollowUser(otherUserId).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+
+                if (response.isSuccessful()) {
+                    isFollowing = false;
+                    actualizarContadorSeguidores(-1);
+                    actualizarBotonFollow();
+
+                    Toast.makeText(OtherProfileActivity.this,
+                            "Has dejado de seguir a este usuario",
+                            Toast.LENGTH_SHORT).show();
+
+                } else {
+                    btnFollow.setEnabled(true);
+                    Toast.makeText(OtherProfileActivity.this,
+                            "No se pudo dejar de seguir. Código: " + response.code(),
+                            Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                btnFollow.setEnabled(true);
+                Toast.makeText(OtherProfileActivity.this,
+                        "Error de conexión al dejar de seguir",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    // ================= ACTUALIZAR BOTÓN =================
+    private void actualizarBotonFollow() {
+
+        if (isFollowing) {
+            btnFollow.setText("Siguiendo");
+        } else {
+            btnFollow.setText("Seguir");
+        }
+
+        btnFollow.setEnabled(true);
+    }
+
+
+    // ================= ACTUALIZAR CONTADOR =================
+    private void actualizarContadorSeguidores(int cambio) {
+
+        int seguidoresActuales = 0;
+
+        try {
+            seguidoresActuales = Integer.parseInt(tvOtherFollowersCount.getText().toString());
+        } catch (NumberFormatException e) {
+            seguidoresActuales = 0;
+        }
+
+        int nuevoTotal = Math.max(0, seguidoresActuales + cambio);
+        tvOtherFollowersCount.setText(String.valueOf(nuevoTotal));
     }
 
     // ================= CLASE INTERNA PARA EL ESPACIADO SIMÉTRICO =================
