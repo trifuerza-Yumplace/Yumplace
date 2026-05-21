@@ -222,7 +222,9 @@ public class PostDetailActivity extends AppCompatActivity {
                             likes--;
                             imgLike.setImageResource(R.drawable.likevac);
                             tvLikes.setText(likes + " me gusta");
+                            sendUpdatedPostResult();
                         }
+
                     }
 
                     @Override
@@ -239,6 +241,7 @@ public class PostDetailActivity extends AppCompatActivity {
                             likes++;
                             imgLike.setImageResource(R.drawable.likellen);
                             tvLikes.setText(likes + " me gusta");
+                            sendUpdatedPostResult();
                         }
                     }
 
@@ -306,11 +309,7 @@ public class PostDetailActivity extends AppCompatActivity {
                             commentsPreview.add(response.body());
                             commentsAdapter.notifyItemInserted(commentsPreview.size() - 1);
 
-                            Intent resultIntent = new Intent();
-                            resultIntent.putExtra("updatedPostId", postId);
-                            resultIntent.putExtra("newCommentsCount", commentsPreview.size());
-                            setResult(RESULT_OK, resultIntent);
-
+                            sendUpdatedPostResult();
                             etComment.setText("");
                         }
                     }
@@ -618,5 +617,27 @@ public class PostDetailActivity extends AppCompatActivity {
         }
 
         return sb.toString();
+    }
+    private void sendUpdatedPostResult() {
+
+        Intent resultIntent = new Intent();
+
+        resultIntent.putExtra("updatedPostId", postId);
+        resultIntent.putExtra(
+                "newCommentsCount",
+                commentsPreview.size()
+        );
+
+        resultIntent.putExtra(
+                "newLikesCount",
+                likes
+        );
+
+        resultIntent.putExtra(
+                "likedByUser",
+                likedByUser
+        );
+
+        setResult(RESULT_OK, resultIntent);
     }
 }

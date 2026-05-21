@@ -62,7 +62,23 @@ public class FeedActivity extends AppCompatActivity {
 
                                 if (post.getId() == updatedPostId) {
 
+                                    // comentarios
                                     post.setComments(newCommentsCount);
+
+                                    // likes
+                                    int newLikesCount =
+                                            result.getData()
+                                                    .getIntExtra("newLikesCount", post.getLikes());
+
+                                    boolean likedByUser =
+                                            result.getData()
+                                                    .getBooleanExtra(
+                                                            "likedByUser",
+                                                            post.isLiked()
+                                                    );
+
+                                    post.setLikes(newLikesCount);
+                                    post.setLiked(likedByUser);
 
                                     int position =
                                             postList.indexOf(post);
