@@ -53,6 +53,10 @@ public interface ApiService {
     @POST("posts")
     Call<Post> createPost(@Body Map<String, Object> post);
 
+    // Obtiene el feed con posts de usuarios seguidos
+    @GET("posts/feed")
+    Call<List<Post>> getFeedPosts();
+
     // Obtiene las publicaciones de un usuario concreto.
     @GET("users/{id}/posts")
     Call<List<Post>> getPostsByUser(@Path("id") Integer userId);
