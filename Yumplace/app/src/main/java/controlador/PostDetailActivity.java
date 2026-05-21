@@ -40,6 +40,7 @@ import vista.CommentAdapter;
 public class PostDetailActivity extends AppCompatActivity {
 
     ImageView btnBack;
+    private int postId;
 
     private int likes;
     private boolean likedByUser;
@@ -98,7 +99,7 @@ public class PostDetailActivity extends AppCompatActivity {
         String profilePhoto =
                 getIntent().getStringExtra("profilePhoto");
 
-        int postId = getIntent().getIntExtra("postId", -1);
+        postId = getIntent().getIntExtra("postId", -1);
         int userId = getIntent().getIntExtra("userId", -1);
 
         likes = getIntent().getIntExtra("likes", 0);
@@ -302,11 +303,15 @@ public class PostDetailActivity extends AppCompatActivity {
                             commentList.add(response.body());
                             adapter.notifyItemInserted(commentList.size() - 1);
 
-                            etComment.setText("");
-
-                            // actualizar preview del detail
                             commentsPreview.add(response.body());
                             commentsAdapter.notifyItemInserted(commentsPreview.size() - 1);
+
+                            Intent resultIntent = new Intent();
+                            resultIntent.putExtra("updatedPostId", postId);
+                            resultIntent.putExtra("newCommentsCount", commentsPreview.size());
+                            setResult(RESULT_OK, resultIntent);
+
+                            etComment.setText("");
                         }
                     }
 

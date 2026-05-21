@@ -20,6 +20,7 @@ import com.bumptech.glide.Glide;
 
 import java.util.List;
 
+import controlador.FeedActivity;
 import controlador.OtherProfileActivity;
 import controlador.PostDetailActivity;
 import modelo.Post;
@@ -262,7 +263,12 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
                 intent.putExtra("userId", post.getUser().getId());
             }
 
-            context.startActivity(intent);
+            if (context instanceof FeedActivity) {
+                ((FeedActivity) context)
+                        .openPostDetail(intent);
+            } else {
+                context.startActivity(intent);
+            }
         });
     }
 
