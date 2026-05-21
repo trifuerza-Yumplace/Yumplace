@@ -66,14 +66,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         holder.tvUsername.setText(username);
         holder.tvCaptionUsername.setText(username);
 
-// título receta
+        // título receta
         holder.tvRecipeTitle.setText(
                 post.getTitle() != null
                         ? post.getTitle()
                         : ""
         );
 
-// fecha formateada
+        // fecha formateada
         String formattedDate = "";
 
         try {
@@ -102,17 +102,19 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
         // ================= IMAGEN =================
         String imageUrl = post.getPostImage();
-        if (imageUrl == null || imageUrl.isEmpty()) {
-            imageUrl = DEFAULT_IMAGE;
+
+        final String finalImageUrl = imageUrl != null ? imageUrl.trim() : "";
+
+        if (!finalImageUrl.isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(finalImageUrl)
+                    .placeholder(R.drawable.loading_post)
+                    .error(R.drawable.no_image)
+                    .into(holder.imgPost);
+        } else {
+            Glide.with(holder.itemView.getContext()).clear(holder.imgPost);
+            holder.imgPost.setImageResource(R.drawable.no_image);
         }
-
-        final String finalImageUrl = imageUrl;
-
-        Glide.with(context)
-                .load(finalImageUrl)
-                .placeholder(R.drawable.pasta)
-                .error(R.drawable.pasta)
-                .into(holder.imgPost);
 
         // ================= FOTO PERFIL =================
         String profilePhoto = null;

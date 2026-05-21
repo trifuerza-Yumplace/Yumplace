@@ -47,17 +47,19 @@ public class ProfileGridAdapter extends RecyclerView.Adapter<ProfileGridAdapter.
 
         String imageUrl = post.getPostImage();
 
-        if (imageUrl == null || imageUrl.isEmpty()) {
-            imageUrl = DEFAULT_IMAGE;
+        final String finalImageUrl = imageUrl != null ? imageUrl.trim() : "";
+
+        if (!finalImageUrl.isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(finalImageUrl)
+                    .placeholder(R.drawable.loading_post)
+                    .error(R.drawable.no_image)
+                    .centerCrop()
+                    .into(holder.image);
+        } else {
+            Glide.with(holder.itemView.getContext()).clear(holder.image);
+            holder.image.setImageResource(R.drawable.no_image);
         }
-
-        final String finalImageUrl = imageUrl;
-
-        Glide.with(context)
-                .load(finalImageUrl)
-                .placeholder(R.drawable.pasta)
-                .error(R.drawable.pasta)
-                .into(holder.image);
 
         holder.itemView.setOnClickListener(v -> {
 
