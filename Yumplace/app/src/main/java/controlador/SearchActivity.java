@@ -176,10 +176,11 @@ public class SearchActivity extends AppCompatActivity {
             if (post.getPostImage() != null && !post.getPostImage().isEmpty()) {
                 Glide.with(this)
                         .load(post.getPostImage())
-                        .placeholder(R.drawable.pasta)
+                        .placeholder(R.drawable.loading_post) // mientras carga
+                        .error(R.drawable.no_image)  // si falla la imagen
                         .into(imgRecipe);
             } else {
-                imgRecipe.setImageResource(R.drawable.pasta);
+                imgRecipe.setImageResource(R.drawable.no_image); // si no hay imagen
             }
 
             itemView.setOnClickListener(v -> {

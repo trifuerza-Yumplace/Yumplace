@@ -90,9 +90,6 @@ public class PostDetailActivity extends AppCompatActivity {
         String username = getIntent().getStringExtra("username");
 
         String postImage = getIntent().getStringExtra("postImage");
-        if (postImage == null || postImage.isEmpty()) {
-            postImage = DEFAULT_IMAGE;
-        }
         String profilePhoto =
                 getIntent().getStringExtra("profilePhoto");
 
@@ -138,10 +135,15 @@ public class PostDetailActivity extends AppCompatActivity {
                 .circleCrop()
                 .into(imgProfile);
 
-        Glide.with(this)
-                .load(postImage)
-                .placeholder(R.drawable.pasta)
-                .into(imgPost);
+        if (postImage != null && !postImage.isEmpty()) {
+            Glide.with(this)
+                    .load(postImage)
+                    .placeholder(R.drawable.loading_post)
+                    .error(R.drawable.no_image)
+                    .into(imgPost);
+        } else {
+            imgPost.setImageResource(R.drawable.no_image);
+        }
 
         imgLike.setImageResource(likedByUser ? R.drawable.likellen : R.drawable.likevac);
 
