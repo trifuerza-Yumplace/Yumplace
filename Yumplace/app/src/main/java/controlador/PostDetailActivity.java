@@ -181,6 +181,8 @@ public class PostDetailActivity extends AppCompatActivity {
                 new LinearLayoutManager(this)
         );
 
+        rvCommentsPreview.setNestedScrollingEnabled(false);
+
         commentsAdapter =
                 new CommentAdapter(commentsPreview);
 
@@ -307,7 +309,7 @@ public class PostDetailActivity extends AppCompatActivity {
                             adapter.notifyItemInserted(commentList.size() - 1);
 
                             commentsPreview.add(response.body());
-                            commentsAdapter.notifyItemInserted(commentsPreview.size() - 1);
+                            commentsAdapter.notifyDataSetChanged();
 
                             sendUpdatedPostResult();
                             etComment.setText("");
