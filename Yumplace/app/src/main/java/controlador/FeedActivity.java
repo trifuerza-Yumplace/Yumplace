@@ -41,6 +41,57 @@ public class FeedActivity extends AppCompatActivity {
 
     boolean isLoading = false;
 
+    private final androidx.activity.result.ActivityResultLauncher<Intent>
+            postDetailLauncher =
+            registerForActivityResult(
+                    new androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+
+                        if (result.getResultCode() == RESULT_OK
+                                && result.getData() != null) {
+
+                            int updatedPostId =
+                                    result.getData()
+                                            .getIntExtra("updatedPostId", -1);
+
+                            int newCommentsCount =
+                                    result.getData()
+                                            .getIntExtra("newCommentsCount", 0);
+
+                            for (Post post : postList) {
+
+                                if (post.getId() == updatedPostId) {
+
+                                    // comentarios
+                                    post.setComments(newCommentsCount);
+
+                                    // likes
+                                    int newLikesCount =
+                                            result.getData()
+                                                    .getIntExtra("newLikesCount", post.getLikes());
+
+                                    boolean likedByUser =
+                                            result.getData()
+                                                    .getBooleanExtra(
+                                                            "likedByUser",
+                                                            post.isLiked()
+                                                    );
+
+                                    post.setLikes(newLikesCount);
+                                    post.setLiked(likedByUser);
+
+                                    int position =
+                                            postList.indexOf(post);
+
+                                    adapter.notifyItemChanged(position);
+
+                                    break;
+                                }
+                            }
+                        }
+                    }
+            );
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,6 +169,10 @@ public class FeedActivity extends AppCompatActivity {
             }
         });
     }
+    public void openPostDetail(Intent intent) {
+        postDetailLauncher.launch(intent);
+    }
+
 
     // ================= CARGA INICIAL =================
     private void cargarPosts() {

@@ -40,9 +40,12 @@ import vista.CommentAdapter;
 public class PostDetailActivity extends AppCompatActivity {
 
     ImageView btnBack;
+    private int postId;
 
     private int likes;
     private boolean likedByUser;
+    private List<Comment> commentsPreview = new ArrayList<>();
+    private CommentAdapter commentsAdapter;
 
     private final String DEFAULT_IMAGE =
             "https://media.istockphoto.com/id/165598110/es/vector/solar-de-construcción.jpg?s=612x612&w=0&k=20&c=CHRUil8J-yeXtkUvetIPKBdXS_mi4fBq7yLPQzpTwfU=";
@@ -93,7 +96,7 @@ public class PostDetailActivity extends AppCompatActivity {
         String profilePhoto =
                 getIntent().getStringExtra("profilePhoto");
 
-        int postId = getIntent().getIntExtra("postId", -1);
+        postId = getIntent().getIntExtra("postId", -1);
         int userId = getIntent().getIntExtra("userId", -1);
 
         likes = getIntent().getIntExtra("likes", 0);
@@ -180,9 +183,9 @@ public class PostDetailActivity extends AppCompatActivity {
                 new LinearLayoutManager(this)
         );
 
-        List<Comment> commentsPreview = new ArrayList<>();
+        rvCommentsPreview.setNestedScrollingEnabled(false);
 
-        CommentAdapter commentsAdapter =
+        commentsAdapter =
                 new CommentAdapter(commentsPreview);
 
         rvCommentsPreview.setAdapter(commentsAdapter);
@@ -223,7 +226,9 @@ public class PostDetailActivity extends AppCompatActivity {
                             likes--;
                             imgLike.setImageResource(R.drawable.likevac);
                             tvLikes.setText(likes + " me gusta");
+                            sendUpdatedPostResult();
                         }
+
                     }
 
                     @Override
@@ -240,6 +245,7 @@ public class PostDetailActivity extends AppCompatActivity {
                             likes++;
                             imgLike.setImageResource(R.drawable.likellen);
                             tvLikes.setText(likes + " me gusta");
+                            sendUpdatedPostResult();
                         }
                     }
 
@@ -304,6 +310,10 @@ public class PostDetailActivity extends AppCompatActivity {
                             commentList.add(response.body());
                             adapter.notifyItemInserted(commentList.size() - 1);
 
+                            commentsPreview.add(response.body());
+                            commentsAdapter.notifyDataSetChanged();
+
+                            sendUpdatedPostResult();
                             etComment.setText("");
                         }
                     }
@@ -611,5 +621,27 @@ public class PostDetailActivity extends AppCompatActivity {
         }
 
         return sb.toString();
+    }
+    private void sendUpdatedPostResult() {
+
+        Intent resultIntent = new Intent();
+
+        resultIntent.putExtra("updatedPostId", postId);
+        resultIntent.putExtra(
+                "newCommentsCount",
+                commentsPreview.size()
+        );
+
+        resultIntent.putExtra(
+                "newLikesCount",
+                likes
+        );
+
+        resultIntent.putExtra(
+                "likedByUser",
+                likedByUser
+        );
+
+        setResult(RESULT_OK, resultIntent);
     }
 }
