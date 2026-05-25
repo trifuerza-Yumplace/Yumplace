@@ -179,7 +179,7 @@ public class FeedActivity extends AppCompatActivity {
 
         ApiService api = RetrofitClient.getApiService(this);
 
-        api.getFeedPosts().enqueue(new Callback<List<Post>>() {
+        api.getAllPosts().enqueue(new Callback<List<Post>>() {
 
             @Override
             public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
