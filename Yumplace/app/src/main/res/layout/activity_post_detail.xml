@@ -8,21 +8,22 @@
     <!-- CABECERA -->
     <LinearLayout
         android:id="@+id/headerDetail"
-        android:elevation="20dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?attr/selectableItemBackground"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:padding="12dp"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:paddingTop="36dp"
+        android:paddingBottom="12dp"
         android:background="@android:color/white"
+        android:elevation="20dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:paddingTop="24dp"
-        android:paddingBottom="12dp">
+        app:layout_constraintEnd_toEndOf="parent">
 
         <ImageView
             android:id="@+id/btnBack"
@@ -216,12 +217,14 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:padding="10dp"
+        android:paddingStart="10dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="30dp"
         android:background="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:paddingTop="8dp"
         android:elevation="10dp">
 
         <EditText
@@ -234,10 +237,12 @@
 
         <ImageView
             android:id="@+id/btnSend"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
             android:layout_marginStart="12dp"
+            android:padding="3dp"
             android:src="@android:drawable/ic_menu_send" />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
