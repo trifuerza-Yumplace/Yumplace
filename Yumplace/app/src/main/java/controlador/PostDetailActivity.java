@@ -86,6 +86,13 @@ public class PostDetailActivity extends AppCompatActivity {
         ImageView imgLike = findViewById(R.id.imgLikeDetail);
 
         TextView tvTitle = findViewById(R.id.tvTitleRecipe);
+
+        EditText etCommentBottom =
+                findViewById(R.id.etComment);
+
+        ImageView btnSendBottom =
+                findViewById(R.id.btnSend);
+
         TextView tvTime = findViewById(R.id.tvTimeRecipe);
         LinearLayout containerCategories = findViewById(R.id.containerCategories);
 
@@ -262,6 +269,54 @@ public class PostDetailActivity extends AppCompatActivity {
             Intent intent = new Intent(this, OtherProfileActivity.class);
             intent.putExtra("userId", userId);
             startActivity(intent);
+        });
+        // ================= COMENTARIO DESDE ABAJO =================
+        btnSendBottom.setOnClickListener(v -> {
+
+            String commentText =
+                    etCommentBottom.getText()
+                            .toString()
+                            .trim();
+
+            if (commentText.isEmpty()) return;
+
+            Comment comment = new Comment();
+            comment.setText(commentText);
+
+            api.addComment(postId, comment)
+                    .enqueue(new Callback<Comment>() {
+
+                        @Override
+                        public void onResponse(Call<Comment> call,
+                                               Response<Comment> response) {
+
+                            if (response.isSuccessful()
+                                    && response.body() != null) {
+
+                                // añadir al preview de comentarios
+                                commentsPreview.add(response.body());
+
+                                commentsAdapter.notifyDataSetChanged();
+
+                                // actualizar feed
+                                sendUpdatedPostResult();
+
+                                // limpiar input
+                                etCommentBottom.setText("");
+
+                                // bajar automáticamente al comentario nuevo
+                                rvCommentsPreview.smoothScrollToPosition(
+                                        commentsPreview.size() - 1
+                                );
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Comment> call,
+                                              Throwable t) {
+
+                        }
+                    });
         });
 
         // ================= COMENTARIOS =================
