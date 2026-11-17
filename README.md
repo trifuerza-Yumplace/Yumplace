@@ -19,7 +19,7 @@ La aplicación funciona como una red social gastronómica, donde los usuarios pu
 El proyecto está desarrollado en Java para Android y se conecta a una API REST construida con Spring Boot, utilizando PostgreSQL como base de datos.
 
 
-## ✨ Funcionalidades
+## Funcionalidades
 
 - **Autenticación:** registro, inicio de sesión y recuperación de contraseña.
 - **Publicaciones:** creación de recetas con imágenes, ingredientes, pasos, categorías y tiempos de preparación.
@@ -30,9 +30,9 @@ El proyecto está desarrollado en Java para Android y se conecta a una API REST 
 - **Perfiles:** visualización y edición del perfil propio, así como consulta de perfiles ajenos.
 - **Comunidad:** seguimiento de otros usuarios y consulta de sus publicaciones.
 
-## 📸 Capturas de pantalla
+## Capturas de pantalla
 
-### 🔐 Autenticación
+### Autenticación
 
 La aplicación permite registrarse, iniciar sesión y recuperar la contraseña.
 
@@ -42,7 +42,7 @@ La aplicación permite registrarse, iniciar sesión y recuperar la contraseña.
   <img src="screenshots/recuperar-contrase%C3%B1a.PNG" width="210" alt="Recuperación de contraseña">
 </p>
 
-### 🍳 Recetas y publicaciones
+### Recetas y publicaciones
 
 Los usuarios pueden explorar recetas, consultar sus ingredientes y pasos de preparación, y crear nuevas publicaciones.
 
@@ -52,7 +52,7 @@ Los usuarios pueden explorar recetas, consultar sus ingredientes y pasos de prep
   <img src="screenshots/crear-receta.PNG" width="210" alt="Crear receta">
 </p>
 
-### 🔎 Búsqueda e interacciones
+### Búsqueda e interacciones
 
 Es posible buscar recetas, filtrarlas por categorías, dar likes y publicar comentarios.
 
@@ -60,7 +60,7 @@ Es posible buscar recetas, filtrarlas por categorías, dar likes y publicar come
   <img src="screenshots/buscador.PNG" width="210" alt="Buscador de recetas">
 </p>
 
-### 👤 Perfiles y comunidad
+### Perfiles y comunidad
 
 Cada usuario dispone de un perfil con sus publicaciones y puede consultar otros perfiles, seguir usuarios y editar su información personal.
 
