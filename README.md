@@ -1,10 +1,15 @@
 # 🍽️ Yumplace
-![yum-texto-emoticonos_110464-498](https://github.com/user-attachments/assets/f82adb91-2580-4153-8291-ac38736c63d7)
 
-## Tabla de Contenidos
+<p align="center">
+  <img src="screenshots/logo.jpg" alt="Logo de Yumplace" width="450">
+</p>
+
+## Tabla de contenidos
 - [Descripción](#descripción)
-- [Instalación y ejecución](#instalación)  
-- [Tecnologías](#tecnologías)  
+- [Funcionalidades](#-funcionalidades)
+- [Capturas de pantalla](#-capturas-de-pantalla)
+- [Instalación y ejecución](#instalación-y-ejecución)
+- [Tecnologías utilizadas](#️-tecnologías-utilizadas)
 
 ## Descripción
 Yumplace es una aplicación Android desarrollada como proyecto de final de ciclo de Desarrollo de Aplicaciones Multiplataforma (DAM).
@@ -13,6 +18,17 @@ La aplicación funciona como una red social gastronómica, donde los usuarios pu
 
 El proyecto está desarrollado en Java para Android y se conecta a una API REST construida con Spring Boot, utilizando PostgreSQL como base de datos.
 
+
+## ✨ Funcionalidades
+
+- **Autenticación:** registro, inicio de sesión y recuperación de contraseña.
+- **Publicaciones:** creación de recetas con imágenes, ingredientes, pasos, categorías y tiempos de preparación.
+- **Feed:** visualización de recetas compartidas por otros usuarios.
+- **Interacciones:** likes y comentarios en las publicaciones.
+- **Detalle de recetas:** consulta de ingredientes y pasos, con opciones para expandir y contraer contenido.
+- **Búsqueda:** exploración de recetas y filtrado por categorías.
+- **Perfiles:** visualización y edición del perfil propio, así como consulta de perfiles ajenos.
+- **Comunidad:** seguimiento de otros usuarios y consulta de sus publicaciones.
 
 ## 📸 Capturas de pantalla
 
@@ -72,14 +88,18 @@ Pasos
 
 Nota: Yumplace funciona actualmente en un entorno de desarrollo local. No dispone de una versión pública desplegada.
 
-## Teconologías | Uso
 
-- Java --> Desarrollo de la aplicación Android
-- Android Studio --> Entorno de desarrollo
-- XML -->  Diseño de interfaces
-- Retrofit --> Comunicación con la API REST
-- JWT --> Autenticación mediante tokens
-- Spring Boot --> Backend
-- PostgreSQL --> Base de datos
-- Supabase --> Alojamiento de PostgreSQL
-- Git y GitHub --> Control de versiones y trabajo en equipo
+## Tecnologías utilizadas
+
+| Tecnología | Uso |
+|---|---|
+| Java | Desarrollo de la aplicación Android |
+| Android Studio | Entorno de desarrollo |
+| XML | Diseño de interfaces |
+| Retrofit | Comunicación con la API REST |
+| JWT | Autenticación mediante tokens |
+| Spring Boot | Backend y lógica de negocio |
+| PostgreSQL | Base de datos relacional |
+| Supabase | Alojamiento de PostgreSQL |
+| Git y GitHub | Control de versiones y colaboración |
+
