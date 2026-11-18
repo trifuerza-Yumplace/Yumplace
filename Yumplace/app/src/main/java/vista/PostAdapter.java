@@ -7,42 +7,45 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+import java.util.Date;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.engiri.yumplace.R;
+import com.bumptech.glide.Glide;
 
 import java.util.List;
 
+import controlador.FeedActivity;
+import controlador.OtherProfileActivity;
 import controlador.PostDetailActivity;
 import modelo.Post;
+import modelo.RecipeIngredientResponse;
+import remote.ApiService;
+import remote.RetrofitClient;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder> {
 
     List<Post> postList;
     Context context;
+    ApiService apiService;
+
+    private final String DEFAULT_IMAGE =
+            "https://media.istockphoto.com/id/165598110/es/vector/solar-de-construcción.jpg?s=612x612&w=0&k=20&c=CHRUil8J-yeXtkUvetIPKBdXS_mi4fBq7yLPQzpTwfU=";
 
     public PostAdapter(Context context, List<Post> postList) {
         this.context = context;
         this.postList = postList;
-    }
-    // Convierte una lista completa en texto con viñetas o números
-    private String listaAIngredientes(List<String> lista) {
-        StringBuilder sb = new StringBuilder();
-        for (String item : lista) {
-            sb.append("• ").append(item).append("\n");
-        }
-        return sb.toString();
+        this.apiService = RetrofitClient.getApiService(context);
     }
 
-    private String listaAPasos(List<String> lista) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < lista.size(); i++) {
-            sb.append(i + 1).append(". ").append(lista.get(i)).append("\n\n");
-        }
-        return sb.toString();
-    }
     @NonNull
     @Override
     public PostViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -53,52 +56,221 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull PostViewHolder holder, int position) {
+
         Post post = postList.get(position);
 
-        // Datos básicos
-        holder.imgProfile.setImageResource(post.profileImage);
-        holder.tvUsername.setText(post.username);
-        holder.tvTime.setText(post.time);
-        holder.imgPost.setImageResource(post.postImage);
-        holder.tvLikes.setText(post.likes + " me gusta");
-        holder.tvComments.setText("Ver los " + post.comments + " comentarios");
+        // ================= TEXTO =================
+        String username = post.getUser() != null && post.getUser().getUsername() != null
+                ? post.getUser().getUsername()
+                : "Usuario";
 
-        // Icono de like según estado
-        if (post.isLiked) {
+        holder.tvUsername.setText(username);
+        holder.tvCaptionUsername.setText(username);
+
+        // título receta
+        holder.tvRecipeTitle.setText(
+                post.getTitle() != null
+                        ? post.getTitle()
+                        : ""
+        );
+
+        // fecha formateada
+        String formattedDate = "";
+
+        try {
+
+            // Backend → 2026-05-09T20:14:31
+            SimpleDateFormat inputFormat =
+                    new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
+
+            Date date = inputFormat.parse(post.getTime());
+
+            SimpleDateFormat outputFormat =
+                    new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+
+            formattedDate = outputFormat.format(date);
+
+        } catch (Exception e) {
+            formattedDate = "";
+        }
+
+        holder.tvTime.setText(formattedDate);
+
+        holder.tvLikes.setText(post.getLikes() + " me gusta");
+        holder.tvComments.setText(
+                "Ver los " + post.getComments() + " comentarios"
+        );
+
+        // ================= IMAGEN =================
+        String imageUrl = post.getPostImage();
+
+        final String finalImageUrl = imageUrl != null ? imageUrl.trim() : "";
+
+        if (!finalImageUrl.isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(finalImageUrl)
+                    .placeholder(R.drawable.loading_post)
+                    .error(R.drawable.no_image)
+                    .into(holder.imgPost);
+        } else {
+            Glide.with(holder.itemView.getContext()).clear(holder.imgPost);
+            holder.imgPost.setImageResource(R.drawable.no_image);
+        }
+
+        // ================= FOTO PERFIL =================
+        String profilePhoto = null;
+
+        android.util.Log.d(
+                "PROFILE_PHOTO_DEBUG",
+                "Usuario: "
+                        + (post.getUser() != null
+                        ? post.getUser().getUsername()
+                        : "NULL")
+                        + " | URL FOTO = "
+                        + profilePhoto
+        );
+
+        if (post.getUser() != null) {
+            profilePhoto = post.getUser().getPhoto();
+        }
+
+        Glide.with(context)
+                .load(profilePhoto)
+                .placeholder(R.drawable.user)
+                .error(R.drawable.user)
+                .circleCrop()
+                .into(holder.imgProfile);
+
+        // ================= PERFIL =================
+        holder.tvUsername.setOnClickListener(v -> {
+            Intent intent = new Intent(context, OtherProfileActivity.class);
+            int userId = (post.getUser() != null) ? post.getUser().getId() : -1;
+            intent.putExtra("userId", userId);
+            context.startActivity(intent);
+        });
+
+        // ================= ICONO LIKE =================
+        if (post.isLiked()) {
             holder.imgLike.setImageResource(R.drawable.likellen);
         } else {
             holder.imgLike.setImageResource(R.drawable.likevac);
         }
 
-        // Click en el botón like
+        // ================= LIKE LOGIC =================
         holder.imgLike.setOnClickListener(v -> {
 
-            if (post.isLiked) {
-                // Quitar like
-                post.isLiked = false;
-                post.likes--;
-            } else {
-                // Dar like
-                post.isLiked = true;
-                post.likes++;
-            }
+            boolean currentlyLiked = post.isLiked();
+            ApiService api = RetrofitClient.getApiService(context);
 
-            // Actualizamos SOLO este item
-            notifyItemChanged(position);
+            if (currentlyLiked) {
+
+                api.unlikePost(post.getId()).enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+
+                        if (response.isSuccessful()) {
+
+                            int adapterPosition = holder.getAdapterPosition();
+                            if (adapterPosition == RecyclerView.NO_POSITION) return;
+
+                            post.setLiked(false);
+                            post.setLikes(Math.max(0, post.getLikes() - 1));
+
+                            notifyItemChanged(adapterPosition);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        Toast.makeText(context, "Error de conexión", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+            } else {
+
+                api.likePost(post.getId()).enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+
+                        if (response.isSuccessful()) {
+
+                            int adapterPosition = holder.getAdapterPosition();
+                            if (adapterPosition == RecyclerView.NO_POSITION) return;
+
+                            post.setLiked(true);
+                            post.setLikes(post.getLikes() + 1);
+
+                            notifyItemChanged(adapterPosition);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        Toast.makeText(context, "Error de conexión", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
         });
-        // pulsamos imagen y se abre pantalla de detalles
+
+        // ================= DETALLE =================
         holder.itemView.setOnClickListener(v -> {
+
             Intent intent = new Intent(context, PostDetailActivity.class);
 
-            intent.putExtra("username", post.username);
-            intent.putExtra("profileImage", post.profileImage);
-            intent.putExtra("postImage", post.postImage);
-            intent.putExtra("likes", post.likes);
+            intent.putExtra("username", post.getUsername());
+            intent.putExtra("postImage", finalImageUrl);
+            intent.putExtra(
+                    "profilePhoto",
+                    post.getUser() != null
+                            ? post.getUser().getPhoto()
+                            : ""
+            );
+            intent.putExtra("likes", post.getLikes());
+            intent.putExtra("title", post.getTitle());
+            intent.putExtra("postId", post.getId());
+            intent.putExtra("likedByUser", post.isLiked());
 
-            intent.putExtra("ingredientsText", listaAIngredientes(post.ingredients));
-            intent.putExtra("stepsText", listaAPasos(post.steps));
+            intent.putExtra(
+                    "time",
+                    post.getPrepTime() != null ? String.valueOf(post.getPrepTime()) : "0"
+            );
 
-            context.startActivity(intent);
+            intent.putExtra("stepsText", post.getSteps());
+
+            if (post.getCategory() != null) {
+                intent.putExtra("category", post.getCategory().getCategoryName());
+            }
+
+            // ================= INGREDIENTES =================
+            if (post.getIngredients() != null) {
+
+                StringBuilder ingredientsText = new StringBuilder();
+
+                for (RecipeIngredientResponse ri : post.getIngredients()) {
+                    if (ri != null && ri.getIngredient() != null) {
+                        ingredientsText
+                                .append("• ")
+                                .append(ri.getIngredient().getName())
+                                .append("\n");
+                    }
+                }
+
+                intent.putExtra("ingredientsText", ingredientsText.toString());
+
+            } else {
+                intent.putExtra("ingredientsText", "");
+            }
+
+            if (post.getUser() != null) {
+                intent.putExtra("userId", post.getUser().getId());
+            }
+
+            if (context instanceof FeedActivity) {
+                ((FeedActivity) context)
+                        .openPostDetail(intent);
+            } else {
+                context.startActivity(intent);
+            }
         });
     }
 
@@ -107,11 +279,11 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         return postList.size();
     }
 
-    // 👇 ÚNICO ViewHolder (el correcto)
     static class PostViewHolder extends RecyclerView.ViewHolder {
 
         ImageView imgProfile, imgPost, imgLike;
-        TextView tvUsername, tvTime, tvLikes, tvComments;
+        TextView tvUsername, tvCaptionUsername, tvRecipeTitle,
+                tvTime, tvLikes, tvComments;
 
         public PostViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -120,9 +292,11 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
             imgPost = itemView.findViewById(R.id.imgPost);
             imgLike = itemView.findViewById(R.id.imgLike);
             tvUsername = itemView.findViewById(R.id.tvUsername);
+            tvRecipeTitle = itemView.findViewById(R.id.tvRecipeTitle);
             tvTime = itemView.findViewById(R.id.tvTime);
             tvLikes = itemView.findViewById(R.id.tvLikes);
             tvComments = itemView.findViewById(R.id.tvComments);
+            tvCaptionUsername = itemView.findViewById(R.id.tvCaptionUsername);
         }
     }
 }

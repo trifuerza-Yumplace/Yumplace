@@ -7,15 +7,15 @@
     android:layout_height="match_parent"
     android:background="@color/bg_light">
 
-    <!-- Volver -->
-
     <!-- Logo circular -->
+
+    <!-- Contenedor circular del logo -->
     <TextView
         android:id="@+id/tvBack"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="48dp"
         android:text="←  Volver"
         android:textColor="@color/text_secondary"
         android:textSize="14sp"
@@ -33,6 +33,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="24dp">
 
+        <!-- Logo de la aplicación -->
         <ImageView
             android:id="@+id/imgLogo"
             android:layout_width="match_parent"
@@ -86,25 +87,31 @@
 
         <EditText
             style="@style/InputField"
-            android:hint="Nombre completo"/>
+            android:hint="Nombre de usuario *"/>
 
         <EditText
             style="@style/InputField"
-            android:hint="Nombre de usuario"/>
+            android:hint="Email *"
+            android:inputType="textEmailAddress"/>
 
         <EditText
             style="@style/InputField"
-            android:hint="Email"/>
-
-        <EditText
-            style="@style/InputField"
-            android:hint="Contraseña"
+            android:hint="Contraseña *"
             android:inputType="textPassword"/>
 
         <EditText
             style="@style/InputField"
-            android:hint="Confirmar contraseña"
+            android:hint="Confirmar contraseña *"
             android:inputType="textPassword"/>
+
+        <!-- Aviso informativo sobre campos obligatorios y longitud mínima -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="* Campos obligatorios."
+            android:textColor="#6B7280"
+            android:textSize="12sp"
+            android:layout_marginBottom="20dp" />
 
         <Button
             android:id="@+id/btnRegister"

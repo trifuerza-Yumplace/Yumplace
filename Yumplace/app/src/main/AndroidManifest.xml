@@ -2,7 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
+        android:usesCleartextTraffic="true"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -11,40 +14,50 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Yumplace">
-
+        <activity
+            android:name="controlador.OtherProfileActivity"
+            android:exported="false" />
         <!-- LOGIN: pantalla inicial -->
         <activity
             android:name="controlador.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- REGISTER -->
+        </activity> <!-- REGISTER -->
         <activity
             android:name="controlador.RegisterActivity"
-            android:exported="false" />
-
-        <!-- FEED -->
+            android:exported="false" /> <!-- FEED -->
         <activity
             android:name="controlador.FeedActivity"
-            android:exported="false" />
-
-        <!-- MAIN (si la mantienes en el proyecto) -->
+            android:exported="false" /> <!-- MAIN (si la mantienes en el proyecto) -->
         <activity
-            android:name="com.engiri.yumplace.MainActivity"
-            android:exported="false" />
-
-        <!-- Detalle Publicacion -->
+            android:name=".MainActivity"
+            android:exported="false" /> <!-- Detalle Publicacion -->
         <activity
             android:name="controlador.PostDetailActivity"
-            android:exported="false" />
-
-        <!-- Buscador -->
+            android:exported="false" /> <!-- Buscador -->
         <activity
             android:name="controlador.SearchActivity"
+            android:exported="false" />
+
+        <activity android:name="controlador.ForgotPasswordActivity" />
+
+        <!-- Perfil -->
+        <activity
+            android:name="controlador.ProfileActivity"
+            android:exported="false" />
+
+        <!-- Editar perfil -->
+        <activity
+            android:name="controlador.EditProfileActivity"
+            android:exported="false" />
+
+        <!-- Publicar receta -->
+        <activity
+            android:name="controlador.PublicPostActivity"
             android:exported="false" />
 
     </application>

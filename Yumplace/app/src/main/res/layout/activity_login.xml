@@ -9,6 +9,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
         android:gravity="center_horizontal"
         android:padding="24dp">
 
@@ -68,6 +69,17 @@
             android:padding="12dp"
             android:background="@drawable/input_background"
             android:layout_marginBottom="16dp"/>
+
+        <!-- Password forget -->
+        <TextView
+            android:id="@+id/forgotPasswordTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="¿Has olvidado tu contraseña?"
+            android:textColor="#F97316"
+            android:textSize="14sp"
+            android:layout_gravity="end"
+            android:layout_marginBottom="16dp" />
 
         <!-- Login button -->
         <Button

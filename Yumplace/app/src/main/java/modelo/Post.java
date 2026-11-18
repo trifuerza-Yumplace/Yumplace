@@ -1,34 +1,182 @@
 package modelo;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 public class Post {
 
-    public int profileImage;
-    public String username;
-    public String time;
-    public int postImage;
-    public int likes;
-    public int comments;
+    private int id;
 
-    // 👉 NUEVO
-    public boolean isLiked;
-    public List<String> ingredients;
-    public List<String> steps;
-    public Post(int profileImage, String username, String time,
-                int postImage, int likes, int comments, List<String> ingredients, List<String> steps) {
-        this.profileImage = profileImage;
-        this.username = username;
-        this.time = time;
+    private String title;
+    private String description;
+
+    @SerializedName("photo")
+    private String postImage;
+
+    private Integer prepTime;
+    private String difficulty;
+
+    private String steps;
+
+    private Category category;
+
+    @SerializedName("publicationDate")
+    private String time;
+
+    private User user;
+
+    // ================= BACKEND STATE =================
+
+    // 🔥 IMPORTANTE: ahora viene del backend como contador real
+    @SerializedName("likesCount")
+    private int likes;
+
+    @SerializedName("commentsCount")
+    private int comments;
+
+    // 🔥 estado real del usuario actual
+    @SerializedName("likedByUser")
+    private boolean likedByUser;
+
+    private List<RecipeIngredientResponse> ingredients;
+    private Integer userId;
+
+    // ================= CONSTRUCTOR =================
+    public Post() {}
+
+    // ================= GETTERS =================
+
+    public int getId() {
+        return id;
+    }
+
+    public String getUsername() {
+        return user != null ? user.getUsername() : "Usuario";
+    }
+
+    public String getPostImage() {
+        return postImage;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public String getSteps() {
+        return steps;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public int getLikes() {
+        return likes;
+    }
+
+    public int getComments() {
+        return comments;
+    }
+
+    public Integer getPrepTime() {
+        return prepTime;
+    }
+
+    public String getDifficulty() {
+        return difficulty;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public List<RecipeIngredientResponse> getIngredients() {
+        return ingredients;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    // ================= LIKE STATE =================
+
+    public boolean isLiked() {
+        return likedByUser;
+    }
+
+    public boolean getLikedByUser() {
+        return likedByUser;
+    }
+
+    public void setLiked(boolean liked) {
+        this.likedByUser = liked;
+    }
+
+    public void setLikedByUser(boolean likedByUser) {
+        this.likedByUser = likedByUser;
+    }
+
+    // ================= SETTERS =================
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setPostImage(String postImage) {
         this.postImage = postImage;
-        this.likes = likes;
-        this.comments = comments;
-        this.ingredients = ingredients;
-        this.steps = steps;
+    }
 
-        // 👉 Por defecto NO está likeado
-        this.isLiked = false;
+    public void setPhoto(String photo) {
+        this.postImage = photo;
+    }
+
+    public void setPrepTime(Integer prepTime) {
+        this.prepTime = prepTime;
+    }
+
+    public void setDifficulty(String difficulty) {
+        this.difficulty = difficulty;
+    }
+
+    public void setSteps(String steps) {
+        this.steps = steps;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setLikes(int likes) {
+        this.likes = likes;
+    }
+
+    public void setComments(int comments) {
+        this.comments = comments;
+    }
+
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 }
-
-

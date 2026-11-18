@@ -12,13 +12,18 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:padding="12dp"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:paddingTop="36dp"
+        android:paddingBottom="12dp"
         android:background="@android:color/white"
+        android:elevation="20dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:paddingTop="24dp"
-        android:paddingBottom="12dp">
+        app:layout_constraintEnd_toEndOf="parent">
 
         <ImageView
             android:id="@+id/btnBack"
@@ -47,6 +52,7 @@
     <!-- CONTENIDO CON SCROLL -->
     <ScrollView
         android:id="@+id/scrollDetail"
+        android:elevation="0dp"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@id/headerDetail"
@@ -66,7 +72,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="260dp"
                 android:scaleType="centerCrop"
-                android:src="@drawable/pasta" />
+                android:src="@drawable/no_image" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
@@ -159,8 +165,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="12dp"
-                android:lineSpacingExtra="6dp"
-                android:text="1. Hierve agua con sal y cocina los espaguetis.&#10;&#10;2. Corta la panceta y fríela hasta que quede crujiente.&#10;&#10;3. Bate los huevos con el queso y la pimienta.&#10;&#10;4. Escurre la pasta reservando un poco de agua.&#10;&#10;5. Mezcla la pasta con la panceta y añade la mezcla de huevo.&#10;&#10;6. Ajusta con agua de cocción si hace falta.&#10;&#10;7. Sirve con más queso y pimienta." />
+                android:lineSpacingExtra="2dp"
+                android:textSize="15sp"
+                android:textColor="#333333"
+                android:textStyle="normal"
+                android:includeFontPadding="false" />
 
             <!-- boton despliegue -->
             <TextView
@@ -175,38 +184,12 @@
                 android:textStyle="bold"/>
 
             <LinearLayout
+                android:id="@+id/containerCategories"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginTop="8dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="#FDE2C5"
-                    android:padding="8dp"
-                    android:text="#pasta"
-                    android:textColor="#FF6F00" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:background="#FDE2C5"
-                    android:padding="8dp"
-                    android:text="#italiana"
-                    android:textColor="#FF6F00" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:background="#FDE2C5"
-                    android:padding="8dp"
-                    android:text="#carbonara"
-                    android:textColor="#FF6F00" />
-            </LinearLayout>
+                android:orientation="horizontal"/>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -217,11 +200,12 @@
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
-            <TextView
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvCommentsPreview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="12dp"
-                android:text="ana_foodie  ¡Se ve delicioso!&#10;Definitivamente voy a probar esta receta 😍&#10;&#10;pedro_chef  Gran receta, gracias por compartir!" />
+                android:nestedScrollingEnabled="false" />
 
         </LinearLayout>
     </ScrollView>
@@ -233,12 +217,14 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:padding="10dp"
+        android:paddingStart="10dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="30dp"
         android:background="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:paddingTop="8dp"
         android:elevation="10dp">
 
         <EditText
@@ -251,10 +237,12 @@
 
         <ImageView
             android:id="@+id/btnSend"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
             android:layout_marginStart="12dp"
+            android:padding="3dp"
             android:src="@android:drawable/ic_menu_send" />
+
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
