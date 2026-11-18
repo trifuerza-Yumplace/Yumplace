@@ -6,10 +6,11 @@
 
 ## Tabla de contenidos
 - [Descripción](#descripción)
-- [Funcionalidades](#-funcionalidades)
-- [Capturas de pantalla](#-capturas-de-pantalla)
+- [Funcionalidades](#funcionalidades)
+- [Capturas de pantalla](#capturas-de-pantalla)
+- [Tecnologías utilizadas](#tecnologías-utilizadas)
+- [Arquitectura del proyecto](#arquitectura-del-proyecto)
 - [Instalación y ejecución](#instalación-y-ejecución)
-- [Tecnologías utilizadas](#️-tecnologías-utilizadas)
 
 ## Descripción
 Yumplace es una aplicación Android desarrollada como proyecto de final de ciclo de Desarrollo de Aplicaciones Multiplataforma (DAM).
@@ -70,25 +71,6 @@ Cada usuario dispone de un perfil con sus publicaciones y puede consultar otros 
   <img src="screenshots/editar-perfil.PNG" width="210" alt="Editar perfil">
 </p>
 
-## Instalación y ejecución
-
-Requisitos
-Android Studio.
-Android SDK compatible con la configuración del proyecto.
-Emulador Android o dispositivo físico.
-Backend Yumplace en ejecución.
-
-Pasos
-- Clonar el repositorio: git clone https://github.com/trifuerza-Yumplace/Yumplace.git
-- Abrir el proyecto Android en Android Studio.
-- Esperar a que finalice la sincronización de Gradle.
-- Configurar la conexión con el backend en RetrofitClient.java.
-- Para el emulador oficial de Android: private static final String BASE_URL = "http://10.0.2.2:8082/";
-- Iniciar el backend y ejecutar la aplicación desde Android Studio.
-
-Nota: Yumplace funciona actualmente en un entorno de desarrollo local. No dispone de una versión pública desplegada.
-
-
 ## Tecnologías utilizadas
 
 | Tecnología | Uso |
@@ -103,3 +85,52 @@ Nota: Yumplace funciona actualmente en un entorno de desarrollo local. No dispon
 | Supabase | Alojamiento de PostgreSQL |
 | Git y GitHub | Control de versiones y colaboración |
 
+
+## Arquitectura del proyecto
+
+Yumplace utiliza una arquitectura cliente-servidor:
+
+- **Frontend:** aplicación Android desarrollada en Java y XML.
+- **Backend:** API REST desarrollada con Java y Spring Boot.
+- **Base de datos:** PostgreSQL alojada en Supabase.
+- **Comunicación:** peticiones HTTP mediante Retrofit.
+- **Autenticación:** basada en tokens JWT.
+
+El backend se mantiene en un repositorio privado, ya que el proyecto fue desarrollado en equipo.
+
+La aplicación requiere que la API esté en funcionamiento para utilizar las funcionalidades conectadas al servidor.
+
+
+
+## Instalación y ejecución
+
+### Requisitos
+
+- Android Studio.
+- Android SDK compatible con la configuración del proyecto.
+- Emulador Android o dispositivo físico.
+- Backend Yumplace en ejecución.
+
+### Pasos
+
+1. Clonar el repositorio:
+
+   ```bash
+   git clone https://github.com/trifuerza-Yumplace/Yumplace.git
+   ```
+
+2. Abrir el proyecto en Android Studio.
+
+3. Esperar a que finalice la sincronización de Gradle.
+
+4. Configurar la conexión con el backend en `RetrofitClient.java`.
+
+   Para utilizar el emulador oficial de Android:
+
+   ```java
+   private static final String BASE_URL = "http://10.0.2.2:8082/";
+   ```
+
+5. Iniciar el backend y ejecutar la aplicación desde Android Studio.
+
+> **Nota:** Yumplace funciona actualmente en un entorno de desarrollo local y no dispone de una versión pública desplegada. El backend se mantiene privado, por lo que su ejecución requiere acceso autorizado.
